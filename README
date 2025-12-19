@@ -1,0 +1,31 @@
+# -*- major-mode: org-mode; -*-
+#+title: Alegoria
+Alegoria is a web front-end to image galleries and collections from several hosting sites. It currently supports TikTok, Instagram, Facebook, and VSCO. To add support for the rest of [[https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md][supported sites]], follow the extraction logic in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
+
+* Screenshots
+[[file:assets/user.png]]
+[[file:assets/image.png]]
+[[file:assets/video.png]]
+
+* Installation
+** Docker
+There's a Docker Compose file available which you can run locally like this:
+
+#+begin_src sh
+cd /path/to/alegoria
+docker compose up -d
+#+end_src
+
+If you'd rather use the image(s) pushed to DockerHub, you can simply remove the =build= section and add an =image= property for the corresponding service in the =docker-compose.yml= file.
+
+#+begin_src yaml
+services:
+  frontend:
+    image: migalmoreno/alegoria-frontend
+    # ...
+  backend:
+    image: migalmoreno/alegoria-backend
+    # ...
+
+# ...
+#+end_src

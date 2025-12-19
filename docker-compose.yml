@@ -1,0 +1,19 @@
+services:
+  frontend:
+    container_name: alegoria_frontend
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
+    environment:
+      - API_URL=http://localhost:5050
+    ports:
+      - 8080:8080
+    restart: always
+  backend:
+    container_name: alegoria_backend
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    ports:
+      - 5050:5000
+    restart: always

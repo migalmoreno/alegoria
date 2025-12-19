@@ -1,0 +1,17 @@
+{
+  "output": {
+    "mode": null
+  },
+  "extractor": {
+    "browser": "chrome",
+    "facebook": {
+      "include": ["photos"]
+    },
+    "instagram": {
+      "include": ["posts", "info", "avatar"]
+    },
+    "vsco": {
+      "include": ["gallery", "avatar", "spaces"]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+import { InstagramPost } from "./instagram";
+import { PostResponse } from "./post";
+import { TikTokMetadataItem, TikTokPostItem } from "./tiktok";
+import { VscoGalleryItem, VscoGalleryPost } from "./vsco";
+import { UserPostProps } from "../components/posts/User";
+import { FacebookPhoto } from "./facebook";
+import { ImagePostProps } from "~/components/posts/Image";
+import { DirectLinkItem } from "./directlink";
+
+export type Post<
+  T extends {
+    user?: T["user"];
+    image?: T["image"];
+    post?: T["post"];
+    photo?: T["photo"];
+  },
+> = {
+  user?: T["user"];
+  image?: T["image"];
+  post?: T["post"];
+  photo?: T["photo"];
+};
+
+export interface SubCategoryProps<T extends Post<T>> {
+  user?: UserPostProps<T["user"]>;
+  image?: ImagePostProps<T["image"]>;
+  post?: ImagePostProps<T["post"]>;
+  photo?: ImagePostProps<T["photo"]>;
+}
+
+interface VscoCategory {
+  user: PostResponse<VscoGalleryItem, VscoGalleryPost>;
+  image: PostResponse<VscoGalleryItem, VscoGalleryPost, DirectLinkItem>;
+}
+
+interface FacebookCategory {
+  user: PostResponse<FacebookPhoto>;
+  photo: PostResponse<FacebookPhoto>;
+}
+
+interface InstagramCategory {
+  user: PostResponse<InstagramPost>;
+}
+
+interface TikTokCategory {
+  user: PostResponse<TikTokMetadataItem, TikTokPostItem>;
+  post: PostResponse<TikTokMetadataItem, TikTokPostItem>;
+}
+
+export interface CategoryConfig {
+  facebook: SubCategoryProps<FacebookCategory>;
+  vsco: SubCategoryProps<VscoCategory>;
+  instagram: SubCategoryProps<InstagramCategory>;
+  tiktok: SubCategoryProps<TikTokCategory>;
+}
