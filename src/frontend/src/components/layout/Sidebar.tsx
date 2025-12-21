@@ -45,18 +45,24 @@ export const Sidebar = () => {
     select: (categories: Category[]) => {
       if (categories) {
         dispatch({ type: "setCategories", categories });
-        const enabledCategories = categories
-          .filter((category: Category) =>
-            Object.keys(pageSchema).includes(category.name),
-          )
-          .map((category: Category) => ({
-            ...category,
-            subcategories: category.subcategories.filter((subcategory) =>
-              Object.keys(
-                pageSchema[category.name as keyof CategoryConfig],
-              ).includes(subcategory.name),
-            ),
-          }));
+        const enabledCategories = [
+          ...categories
+            .filter((category: Category) =>
+              Object.keys(pageSchema).includes(category.name),
+            )
+            .map((category: Category) => ({
+              ...category,
+              subcategories: category.subcategories.filter((subcategory) =>
+                Object.keys(
+                  pageSchema[category.name as keyof CategoryConfig],
+                ).includes(subcategory.name),
+              ),
+            })),
+          {
+            name: "url",
+            subcategories: [],
+          },
+        ];
         dispatch({
           type: "setEnabledCategories",
           categories: enabledCategories,

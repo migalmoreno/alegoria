@@ -8,9 +8,9 @@ interface SubCategory {
 interface Category {
   name: string;
   subcategories: SubCategory[];
-  root: string;
+  root?: string;
   base_pattern?: string;
-  description: string;
+  description?: string;
   domains?: string[];
   legacy_domains?: string[];
 }

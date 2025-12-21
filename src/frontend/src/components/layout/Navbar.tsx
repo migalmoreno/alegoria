@@ -53,7 +53,11 @@ export const Navbar = () => {
   );
 
   const { data: extractor } = useQuery<Extractor>({
-    enabled: !!activeCategory && !!activeSubCategory && showSearchForm,
+    enabled:
+      !!activeCategory &&
+      activeCategory.subcategories.length > 0 &&
+      !!activeSubCategory &&
+      showSearchForm,
     queryKey: [
       `/extractors?category=${activeCategory?.name}&subcategory=${activeSubCategory?.name}`,
     ],
@@ -67,11 +71,13 @@ export const Navbar = () => {
         formData.searchValue,
       );
       navigate(`/post/${encodeURIComponent(interpolatedUrl)}`);
+    } else {
+      navigate(`/post/${encodeURIComponent(formData.searchValue)}`);
     }
   };
 
   return (
-    <div className="flex items-center min-h-[60px] bg-black w-full sticky top-0 right-0 justify-between text-white p-2 z-10">
+    <div className="flex items-center min-h-[60px] bg-black w-full sticky top-0 right-0 justify-between text-white p-2 z-10 border-neutral-800 border-b">
       {showSearchForm ? (
         <Button
           icon={<ArrowLeft />}
@@ -99,14 +105,23 @@ export const Navbar = () => {
             <div className="flex gap-x-2 w-full">
               <Select
                 value={activeCategory?.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const category = categories.find(
+                    (category) => category.name === e.target.value,
+                  ) as Category;
                   dispatch({
                     type: "setActiveCategory",
-                    category: categories.find(
-                      (category) => category.name === e.target.value,
-                    ) as Category,
-                  })
-                }
+                    category,
+                  });
+                  dispatch({
+                    type: "setActiveSubCategory",
+                    subcategory:
+                      category.subcategories &&
+                      category.subcategories.length > 0
+                        ? category.subcategories[0]
+                        : undefined,
+                  });
+                }}
               >
                 {categories.map((category, i) => (
                   <option key={i} value={category.name}>
@@ -114,7 +129,7 @@ export const Navbar = () => {
                   </option>
                 ))}
               </Select>
-              {activeCategory && (
+              {activeCategory && activeCategory?.subcategories?.length > 0 && (
                 <Select
                   value={activeSubCategory?.name}
                   onChange={(e) =>
@@ -126,7 +141,7 @@ export const Navbar = () => {
                     })
                   }
                 >
-                  {activeCategory?.subcategories.map((subcategory, i) => (
+                  {activeCategory.subcategories.map((subcategory, i) => (
                     <option key={i} value={subcategory.name}>
                       {subcategory.name}
                     </option>
@@ -135,7 +150,6 @@ export const Navbar = () => {
               )}
             </div>
           </form>
-          {/* {errors.user && <span>This field is required</span>} */}
         </div>
       ) : (
         <Button

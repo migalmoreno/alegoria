@@ -20,7 +20,7 @@ type AppAction =
   | { type: "setCategories"; categories: Category[] }
   | { type: "setEnabledCategories"; categories: Category[] }
   | { type: "setActiveCategory"; category: Category }
-  | { type: "setActiveSubCategory"; subcategory: SubCategory }
+  | { type: "setActiveSubCategory"; subcategory?: SubCategory }
   | { type: "setActiveExtractor"; extractor: Extractor }
   | { type: "showMobileMenu"; show: boolean }
   | { type: "showSearchForm"; show: boolean };
