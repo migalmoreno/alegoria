@@ -14,7 +14,7 @@ export default defineConfig({
       projects: [path.resolve(__dirname, "tsconfig.app.json")],
     }),
   ],
-  envDir: path.resolve(__dirname),
+  envDir: __dirname,
   server: {
     allowedHosts: true,
   },
