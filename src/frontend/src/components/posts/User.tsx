@@ -23,7 +23,9 @@ const UserExtractorsContainer = <T,>({
 }) => {
   const { url } = useParams();
   const { data, isError, error } = useQuery<PostResponse<T>>({
-    queryKey: [`/posts/${url && encodeURIComponent(url)}`],
+    queryKey: [`/posts/${encodeURIComponent(String(url))}`],
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   if (isError) {
