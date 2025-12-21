@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import Info from "unplugin-info/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -9,6 +10,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    Info(),
     tsconfigPaths({
       root: ".",
       projects: [path.resolve(__dirname, "tsconfig.app.json")],
@@ -17,5 +19,8 @@ export default defineConfig({
   envDir: __dirname,
   server: {
     allowedHosts: true,
+  },
+  define: {
+    APP_VERSION: JSON.stringify(process.env.npm_package_version),
   },
 });

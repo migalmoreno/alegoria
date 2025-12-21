@@ -8,6 +8,7 @@ import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { pageSchema } from "~/page-schema";
+import { abbreviatedSha } from "~build/git";
 
 interface MenuLinkProps {
   label: string;
@@ -28,8 +29,15 @@ const MenuLink = ({ link, label, icon }: MenuLinkProps) => {
 
 const Menu = () => {
   return (
-    <div className="flex flex-col gap-y-2 w-full">
-      <MenuLink label="Home" link="/" icon={<HomeIcon />} />
+    <div className="flex flex-col gap-y-2 justify-between w-[250px] border-r border-neutral-800">
+      <div className="p-2">
+        <MenuLink label="Home" link="/" icon={<HomeIcon />} />
+      </div>
+      <div className="border-t border-neutral-800 p-2">
+        <span className="flex py-4 p-2 text-sm text-neutral-300">
+          Version: {APP_VERSION}-{abbreviatedSha}
+        </span>
+      </div>
     </div>
   );
 };
@@ -73,7 +81,7 @@ export const Sidebar = () => {
   });
 
   return (
-    <div className="sticky top-[60px] h-[calc(100dvh-60px)] overflow-auto bg-black text-white p-2 hidden lg:flex shrink-0 w-[200px]">
+    <div className="sticky top-[60px] h-[calc(100dvh-60px)] overflow-auto bg-black text-white hidden lg:flex shrink-0">
       <Menu />
     </div>
   );
@@ -89,12 +97,12 @@ export const MobileMenu = () => {
           initial={{ x: -320 }}
           exit={{ x: -640 }}
           transition={{ duration: 0.1 }}
-          className="z-10 bg-black fixed h-dvh text-white flex flex-col top-0 w-[200px]"
+          className="z-10 bg-black fixed h-dvh text-white flex flex-col top-0"
         >
-          <div className="flex h-[60px] shrink-0 p-2">
+          <div className="flex h-[60px] shrink-0 p-2 border-b border-neutral-800">
             <SharedNavbarSubMenu />
           </div>
-          <div className="h-full overflow-auto flex px-2">
+          <div className="h-full overflow-auto flex">
             <Menu />
           </div>
         </motion.div>
