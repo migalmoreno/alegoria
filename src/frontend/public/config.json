@@ -5,13 +5,13 @@
   "extractor": {
     "browser": "chrome",
     "facebook": {
-      "include": ["photos"]
+      "include": "all"
     },
     "instagram": {
       "include": ["posts", "info", "avatar"]
     },
     "vsco": {
-      "include": ["gallery", "avatar", "spaces"]
+      "include": "all"
     }
   }
 }

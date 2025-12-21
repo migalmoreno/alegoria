@@ -30,3 +30,6 @@ services:
 
 # ...
 #+end_src
+
+* Configuration
+You can edit the default gallery-dl [[file:src/frontend/public/config.json][config.json]] file locally with the [[https://gdl-org.github.io/docs/configuration.html][supported configuration options]], such as to change the extractors browser, the included subcategories, the order of posts, and so on.
