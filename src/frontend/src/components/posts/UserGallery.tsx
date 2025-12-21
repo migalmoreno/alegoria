@@ -33,17 +33,21 @@ export const UserPageGalleryContainer = ({
 };
 
 interface UserPageGalleryProps<T> {
-  data: PostResponse<T>;
+  data?: PostResponse<T>;
   url: string;
   extractor: GalleryExtractor<T>;
 }
 
 export const UserPageGallery = <T,>({
+  data: initialData,
   url,
   extractor,
 }: UserPageGalleryProps<T>) => {
   const fetchPosts = async (page: number) => {
     if (url) {
+      if (page === 0 && initialData) {
+        return extractor.extractor(initialData as T);
+      }
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/posts/${encodeURIComponent(url)}/?limit=${ITEMS_PER_PAGE}&skip=${page * ITEMS_PER_PAGE}${extractor.batch ? "&batch=true" : ""}`,
       );
@@ -76,7 +80,7 @@ export const UserPageGallery = <T,>({
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: ["posts", url, "paginated"],
+    queryKey: [`/posts/${url}`],
     queryFn: ({ pageParam }) => {
       return fetchPosts(pageParam);
     },

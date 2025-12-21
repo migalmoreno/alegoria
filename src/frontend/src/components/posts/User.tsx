@@ -1,4 +1,4 @@
-import { PostResponse, UserExtractor } from "../../types";
+import { GalleryExtractor, PostResponse, UserExtractor } from "../../types";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { UserPageInfo } from "./UserInfo";
@@ -75,10 +75,27 @@ const UserExtractorsContainer = <T,>({
         extractors.findIndex((ext) => ext.type === b.extractor.type),
     );
 
+  const dataExtractors = extractors.filter((ext) => !!!ext.urlMatcher);
   const postExtractors = extractors.filter((ext) => ext.type === "post");
 
   return (
     <div className="flex flex-col gap-y-8 w-full">
+      {dataExtractors &&
+        data &&
+        dataExtractors?.length > 0 &&
+        dataExtractors.map((ext, i) => {
+          switch (ext.type) {
+            case "gallery":
+              return (
+                <UserPageGallery
+                  key={i}
+                  data={data}
+                  url={String(url)}
+                  extractor={ext as GalleryExtractor<T>}
+                />
+              );
+          }
+        })}
       {urlExtractors &&
         data &&
         urlExtractors?.length > 0 &&
@@ -97,13 +114,10 @@ const UserExtractorsContainer = <T,>({
               return (
                 <UserPageGallery
                   key={i}
-                  data={data}
                   url={ext.url}
                   extractor={ext.extractor}
                 />
               );
-            default:
-              return <></>;
           }
         })}
 
