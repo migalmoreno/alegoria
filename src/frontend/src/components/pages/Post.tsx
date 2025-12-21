@@ -14,7 +14,7 @@ export const PostPage = <T extends Post<T>>() => {
     isPending,
     isFetched,
   } = useQuery<Extractor>({
-    queryKey: [`/extractors?url=${url && encodeURIComponent(url)}`],
+    queryKey: [`/extractors?url=${encodeURIComponent(String(url))}`],
   });
   const { start, complete } = useLoadingBar({
     color: "var(--color-indigo-400)",
@@ -40,6 +40,9 @@ export const PostPage = <T extends Post<T>>() => {
       switch (subcategory as keyof SubCategoryProps<T>) {
         case "user": {
           return <UserPost {...(schemaProps as UserPostProps<T["user"]>)} />;
+        }
+        case "creator": {
+          return <UserPost {...(schemaProps as UserPostProps<T["creator"]>)} />;
         }
         case "photo":
           return <ImagePost {...(schemaProps as ImagePostProps<T["photo"]>)} />;

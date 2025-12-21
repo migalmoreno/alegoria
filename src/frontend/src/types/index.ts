@@ -9,3 +9,4 @@ export * from "./user";
 export * from "./directlink";
 export * from "./image";
 export * from "./ytdl";
+export * from "./patreon";

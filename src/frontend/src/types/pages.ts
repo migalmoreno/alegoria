@@ -6,16 +6,19 @@ import { UserPostProps } from "../components/posts/User";
 import { FacebookPhoto } from "./facebook";
 import { ImagePostProps } from "~/components/posts/Image";
 import { DirectLinkItem } from "./directlink";
+import { PatreonItem } from "./patreon";
 
 export type Post<
   T extends {
     user?: T["user"];
+    creator?: T["creator"];
     image?: T["image"];
     post?: T["post"];
     photo?: T["photo"];
   },
 > = {
   user?: T["user"];
+  creator?: T["creator"];
   image?: T["image"];
   post?: T["post"];
   photo?: T["photo"];
@@ -23,6 +26,7 @@ export type Post<
 
 export interface SubCategoryProps<T extends Post<T>> {
   user?: UserPostProps<T["user"]>;
+  creator?: UserPostProps<T["creator"]>;
   image?: ImagePostProps<T["image"]>;
   post?: ImagePostProps<T["post"]>;
   photo?: ImagePostProps<T["photo"]>;
@@ -47,9 +51,15 @@ interface TikTokCategory {
   post: PostResponse<TikTokMetadataItem, TikTokPostItem>;
 }
 
+interface PatreonCategory {
+  creator: PostResponse<PatreonItem>;
+  post: PostResponse<PatreonItem>;
+}
+
 export interface CategoryConfig {
   facebook: SubCategoryProps<FacebookCategory>;
   vsco: SubCategoryProps<VscoCategory>;
   instagram: SubCategoryProps<InstagramCategory>;
   tiktok: SubCategoryProps<TikTokCategory>;
+  patreon: SubCategoryProps<PatreonCategory>;
 }

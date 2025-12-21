@@ -1,6 +1,27 @@
 import { CategoryConfig } from "./types";
 
 export const pageSchema: CategoryConfig = {
+  patreon: {
+    creator: {
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data) => {
+            return data.metadata.map((post) => ({
+              thumbnail: post.thumbnail.original,
+              url: post.url,
+            }));
+          },
+        },
+      ],
+    },
+    post: {
+      extractor: (data) => ({
+        url: data.metadata[0].url,
+        user: data.metadata[0].creator.id,
+      }),
+    },
+  },
   facebook: {
     user: {
       extractors: [
