@@ -38,7 +38,7 @@ interface SearchSelectProps {
 
 const SearchSelect = ({ value, onChange, children }: SearchSelectProps) => (
   <select
-    className="appearance-none bg-neutral-200 rounded-2xl px-2 border border-neutral-300 flex items-center text-center text-neutral-700 text-xs h-7 font-medium cursor-pointer"
+    className="appearance-none bg-neutral-200 rounded-2xl px-2 flex items-center text-center text-neutral-700 text-xs h-7 font-medium cursor-pointer outline-none"
     value={value}
     onChange={onChange}
   >
@@ -87,67 +87,67 @@ const SearchForm = () => {
   };
 
   return (
-    <form
-      className="flex gap-x-4 w-full md:w-auto flex-wrap sm:flex-nowrap gap-y-4 top-0"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div className="flex w-full gap-x-2">
-        <div className="relative flex-auto">
+    <div className="flex gap-x-4 w-full md:w-auto flex-wrap sm:flex-nowrap gap-y-4 top-0">
+      <div className="flex w-full gap-x-2 relative">
+        <form
+          className="flex-auto border border-neutral-800 rounded-full px-4 py-2 w-full md:min-w-[300px] bg-neutral-900 flex"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <input
-            className="border border-neutral-800 rounded-full px-4 py-2 w-full md:min-w-[300px] bg-neutral-900 outline-none pr-36"
+            className="outline-none pr-36 w-full"
             placeholder="Search"
             {...register("searchValue", { required: true })}
           />
-          <div className="flex gap-x-1 absolute top-1.75 right-2 items-center">
+          <Button icon={<SearchIcon />} type="submit" extraClassName="!p-0" />
+        </form>
+        <div className="flex gap-x-1 absolute top-1.75 right-14 items-center">
+          <SearchSelect
+            value={activeCategory?.name}
+            onChange={(e) => {
+              const category = categories.find(
+                (category) => category.name === e.target.value,
+              ) as Category;
+              dispatch({
+                type: "setActiveCategory",
+                category,
+              });
+              dispatch({
+                type: "setActiveSubCategory",
+                subcategory:
+                  category.subcategories && category.subcategories.length > 0
+                    ? category.subcategories[0]
+                    : undefined,
+              });
+            }}
+          >
+            {categories.map((category, i) => (
+              <option key={i} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </SearchSelect>
+          {activeCategory && activeCategory?.subcategories?.length > 0 && (
             <SearchSelect
-              value={activeCategory?.name}
+              value={activeSubCategory?.name}
               onChange={(e) => {
-                const category = categories.find(
-                  (category) => category.name === e.target.value,
-                ) as Category;
-                dispatch({
-                  type: "setActiveCategory",
-                  category,
-                });
                 dispatch({
                   type: "setActiveSubCategory",
-                  subcategory:
-                    category.subcategories && category.subcategories.length > 0
-                      ? category.subcategories[0]
-                      : undefined,
+                  subcategory: activeCategory?.subcategories.find(
+                    (subcategory) => subcategory.name === e.target.value,
+                  ) as SubCategory,
                 });
               }}
             >
-              {categories.map((category, i) => (
-                <option key={i} value={category.name}>
-                  {category.name}
+              {activeCategory.subcategories.map((subcategory, i) => (
+                <option key={i} value={subcategory.name}>
+                  {subcategory.name}
                 </option>
               ))}
             </SearchSelect>
-            {activeCategory && activeCategory?.subcategories?.length > 0 && (
-              <SearchSelect
-                value={activeSubCategory?.name}
-                onChange={(e) =>
-                  dispatch({
-                    type: "setActiveSubCategory",
-                    subcategory: activeCategory?.subcategories.find(
-                      (subcategory) => subcategory.name === e.target.value,
-                    ) as SubCategory,
-                  })
-                }
-              >
-                {activeCategory.subcategories.map((subcategory, i) => (
-                  <option key={i} value={subcategory.name}>
-                    {subcategory.name}
-                  </option>
-                ))}
-              </SearchSelect>
-            )}
-          </div>
+          )}
         </div>
-        <Button icon={<SearchIcon />} />
       </div>
-    </form>
+    </div>
   );
 };
 
