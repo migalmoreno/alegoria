@@ -17,8 +17,11 @@ export const pageSchema: CategoryConfig = {
     },
     post: {
       extractor: (data) => ({
-        url: data.metadata[0].url,
-        user: data.metadata[0].creator.id,
+        url: data.metadata[0].thumbnail.original,
+        user: data.metadata[0].creator.vanity,
+        description: data.metadata[0].content,
+        authorUrl: data.metadata[0].creator.url,
+        authorThumbnail: data.metadata[0].campaign.avatar_photo_url,
       }),
     },
   },
