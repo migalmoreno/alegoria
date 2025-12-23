@@ -4,7 +4,6 @@ import { formatNumber } from "../../utils";
 import { useQuery } from "@tanstack/react-query";
 import { UserAvatar } from "../UserAvatar";
 import { ErrorContainer } from "../ErrorContainer";
-import { LoadingContainer } from "../LoadingContainer";
 
 interface StatsItemProps {
   label: string;
@@ -43,16 +42,20 @@ const Stats = ({ stats }: { stats?: UserStats }) => {
   );
 };
 
-const UserPageInfoContainer = ({ user }: { user: UserInfo }) => {
+const UserPageInfoContainer = ({
+  user,
+  isPending,
+}: {
+  user?: UserInfo;
+  isPending: boolean;
+}) => {
   return (
     <div className="flex flex-col border-b border-neutral-800">
       <div className="flex gap-x-4 py-6 px-6">
-        {user?.thumbnail && (
-          <UserAvatar
-            thumbnail={user.thumbnail}
-            extraClassNames="h-24 w-24 sm:h-36 sm:w-36"
-          />
-        )}
+        <UserAvatar
+          thumbnail={user?.thumbnail}
+          extraClassNames={`bg-neutral-800 h-24 w-24 sm:h-36 sm:w-36 ${isPending ? "animate-[pulse_0.7s_ease-in-out_infinite]" : ""}`}
+        />
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-2">
             {user?.name && <h1 className="text-3xl font-bold">{user.name}</h1>}
@@ -61,7 +64,7 @@ const UserPageInfoContainer = ({ user }: { user: UserInfo }) => {
             )}
           </div>
           <div className="md:flex">
-            <Stats stats={user.stats} />
+            <Stats stats={user?.stats} />
           </div>
           {user?.category && (
             <span className="text-neutral-500 text-sm">{user.category}</span>
@@ -84,7 +87,7 @@ const UserPageInfoContainer = ({ user }: { user: UserInfo }) => {
           )}
         </div>
       </div>
-      {user.private && (
+      {user?.private && (
         <div className="h-36 flex items-center justify-center w-full">
           <span className="text-neutral-200">This account is private</span>
         </div>
@@ -110,13 +113,9 @@ export const UserPageInfo = <T,>({ url, extractor }: UserPageInfoProps<T>) => {
     select: (user: T) => extractor.extractor(user),
   });
 
-  if (isPending) {
-    return <LoadingContainer />;
-  }
-
   if (isError) {
     return <ErrorContainer error={error} />;
   }
 
-  return user && <UserPageInfoContainer user={user} />;
+  return <UserPageInfoContainer isPending={isPending} user={user} />;
 };
