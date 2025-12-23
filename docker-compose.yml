@@ -8,6 +8,8 @@ services:
       - API_URL=http://localhost:5050
     ports:
       - 8080:8080
+    depends_on:
+      - backend
     restart: always
   backend:
     container_name: alegoria_backend
