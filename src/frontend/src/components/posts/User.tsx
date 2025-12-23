@@ -1,10 +1,16 @@
-import { GalleryExtractor, PostResponse, UserExtractor } from "../../types";
+import {
+  BoardExtractor,
+  GalleryExtractor,
+  PostResponse,
+  UserExtractor,
+} from "../../types";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { UserPageInfo } from "./UserInfo";
-import { UserPageGallery } from "./UserGallery";
+import { UserGallery } from "./UserGallery";
 import { UserPagePosts } from "./UserPost";
 import { ErrorContainer } from "../ErrorContainer";
+import { UserBoard } from "./UserBoard";
 
 export interface URLUserExtractor<T> {
   url: string;
@@ -79,15 +85,24 @@ const UserExtractorsContainer = <T,>({
   const postExtractors = extractors.filter((ext) => ext.type === "post");
 
   return (
-    <div className="flex flex-col gap-y-8 w-full">
+    <div className="flex flex-col gap-y-4 w-full">
       {dataExtractors &&
         data &&
         dataExtractors?.length > 0 &&
         dataExtractors.map((ext, i) => {
           switch (ext.type) {
+            case "board":
+              return (
+                <UserBoard
+                  key={i}
+                  data={data}
+                  url={String(url)}
+                  extractor={ext as BoardExtractor<T>}
+                />
+              );
             case "gallery":
               return (
-                <UserPageGallery
+                <UserGallery
                   key={i}
                   data={data}
                   url={String(url)}
@@ -112,15 +127,10 @@ const UserExtractorsContainer = <T,>({
               );
             case "gallery":
               return (
-                <UserPageGallery
-                  key={i}
-                  url={ext.url}
-                  extractor={ext.extractor}
-                />
+                <UserGallery key={i} url={ext.url} extractor={ext.extractor} />
               );
           }
         })}
-
       {postExtractors?.length > 0 && url && (
         <UserPagePosts url={url} extractors={extractors} />
       )}
