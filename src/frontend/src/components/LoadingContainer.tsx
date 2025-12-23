@@ -1,8 +1,14 @@
 import { LoaderCircle } from "lucide-react";
 
-export const LoadingContainer = () => {
+export interface LoadingContainerProps {
+  extraClassName?: string;
+}
+
+export const LoadingContainer = ({ extraClassName }: LoadingContainerProps) => {
   return (
-    <div className="w-full flex items-center justify-center">
+    <div
+      className={`w-full flex flex-auto items-center justify-center ${extraClassName}`}
+    >
       <LoaderCircle className="animate-spin" size={48} />
     </div>
   );

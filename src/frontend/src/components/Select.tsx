@@ -10,7 +10,7 @@ export const Select = ({ value, onChange, children }: SelectProps) => {
   return (
     <select
       value={value}
-      className="bg-neutral-800 rounded border border-neutral-600 p-2 w-full"
+      className="bg-neutral-900 rounded-lg border border-neutral-800 p-2 w-full"
       onChange={onChange}
     >
       {children}
