@@ -1,10 +1,11 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
 #+OPTIONS: toc:nil num:nil
 #+title: Alegoria
-Alegoria is a web front-end to image galleries and collections from several hosting sites. It currently supports TikTok, Instagram, Facebook, and VSCO. To add support for the rest of [[https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md][supported sites]], follow the extraction logic in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
+Alegoria is a web front-end to image galleries and collections from several hosting sites. It currently supports TikTok, Instagram, Facebook, Pinterest, among other sites. To add support for the rest of [[https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md][supported sites]], follow the extraction logic in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
 
 * Screenshots
 [[file:assets/user.png]]
+[[file:assets/board.png]]
 [[file:assets/image.png]]
 [[file:assets/video.png]]
 
