@@ -32,7 +32,7 @@ export const PostPage = <T extends Post<T>>() => {
   if (extractor?.category && extractor.subcategory) {
     const { category, subcategory } = extractor;
     const schemaProps =
-      pageSchema[category as keyof CategoryConfig][
+      pageSchema[category as keyof CategoryConfig]?.[
         subcategory as keyof SubCategoryProps<T>
       ];
 
@@ -40,6 +40,12 @@ export const PostPage = <T extends Post<T>>() => {
       switch (subcategory as keyof SubCategoryProps<T>) {
         case "user": {
           return <UserPost {...(schemaProps as UserPostProps<T["user"]>)} />;
+        }
+        case "board": {
+          return <UserPost {...(schemaProps as UserPostProps<T["board"]>)} />;
+        }
+        case "created": {
+          return <UserPost {...(schemaProps as UserPostProps<T["created"]>)} />;
         }
         case "creator": {
           return <UserPost {...(schemaProps as UserPostProps<T["creator"]>)} />;
@@ -50,6 +56,9 @@ export const PostPage = <T extends Post<T>>() => {
           return <ImagePost {...(schemaProps as ImagePostProps<T["post"]>)} />;
         case "image": {
           return <ImagePost {...(schemaProps as ImagePostProps<T["image"]>)} />;
+        }
+        case "pin": {
+          return <ImagePost {...(schemaProps as ImagePostProps<T["pin"]>)} />;
         }
       }
     }

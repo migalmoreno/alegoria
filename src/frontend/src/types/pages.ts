@@ -7,6 +7,7 @@ import { FacebookPhoto } from "./facebook";
 import { ImagePostProps } from "~/components/posts/Image";
 import { DirectLinkItem } from "./directlink";
 import { PatreonItem } from "./patreon";
+import { PinterestBoardItem, PinterestImageItem } from "./pinterest";
 
 export type Post<
   T extends {
@@ -15,6 +16,9 @@ export type Post<
     image?: T["image"];
     post?: T["post"];
     photo?: T["photo"];
+    board?: T["board"];
+    pin?: T["pin"];
+    created?: T["created"];
   },
 > = {
   user?: T["user"];
@@ -22,6 +26,9 @@ export type Post<
   image?: T["image"];
   post?: T["post"];
   photo?: T["photo"];
+  board?: T["board"];
+  pin?: T["pin"];
+  created?: T["created"];
 };
 
 export interface SubCategoryProps<T extends Post<T>> {
@@ -30,6 +37,9 @@ export interface SubCategoryProps<T extends Post<T>> {
   image?: ImagePostProps<T["image"]>;
   post?: ImagePostProps<T["post"]>;
   photo?: ImagePostProps<T["photo"]>;
+  board?: UserPostProps<T["board"]>;
+  pin?: ImagePostProps<T["pin"]>;
+  created?: UserPostProps<T["board"]>;
 }
 
 interface VscoCategory {
@@ -56,10 +66,18 @@ interface PatreonCategory {
   post: PostResponse<PatreonItem>;
 }
 
+interface PinterestCategory {
+  user: PostResponse<PinterestBoardItem>;
+  board: PostResponse<PinterestImageItem>;
+  pin: PostResponse<PinterestImageItem>;
+  created: PostResponse<PinterestBoardItem>;
+}
+
 export interface CategoryConfig {
   facebook: SubCategoryProps<FacebookCategory>;
   vsco: SubCategoryProps<VscoCategory>;
   instagram: SubCategoryProps<InstagramCategory>;
   tiktok: SubCategoryProps<TikTokCategory>;
   patreon: SubCategoryProps<PatreonCategory>;
+  pinterest: SubCategoryProps<PinterestCategory>;
 }

@@ -1,6 +1,57 @@
 import { CategoryConfig } from "./types";
 
 export const pageSchema: CategoryConfig = {
+  pinterest: {
+    user: {
+      extractors: [
+        {
+          type: "board",
+          extractor: (data) =>
+            data.metadata.map((post) => ({
+              name: post.name,
+              thumbnail: post.image_cover_url,
+              url: `https://pinterest.com${encodeURIComponent(post.url)}`,
+              count: post.pin_count,
+              date: new Date(post.created_at),
+            })),
+        },
+      ],
+    },
+    created: {
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data) =>
+            data.metadata.map((post) => ({
+              thumbnail: post.url,
+              url: `https://pinterest.com${post.seo_url}`,
+            })),
+        },
+      ],
+    },
+    board: {
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data) =>
+            data.metadata.map((post) => ({
+              thumbnail: post.url,
+              url: `https://pinterest.com${post.seo_url}`,
+            })),
+        },
+      ],
+    },
+    pin: {
+      extractor: (data) => ({
+        url: data.metadata[0].images.orig.url,
+        user: data.metadata[0].pinner.username,
+        authorThumbnail: data.metadata[0].pinner.image_small_url,
+        authorUrl: `https://pinterest.com/${data.metadata[0].pinner.username}`,
+        description: data.metadata[0].description,
+        date: new Date(data.metadata[0].created_at),
+      }),
+    },
+  },
   patreon: {
     creator: {
       extractors: [
