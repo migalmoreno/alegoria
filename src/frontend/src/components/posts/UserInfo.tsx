@@ -58,12 +58,14 @@ const UserPageInfoContainer = ({
         />
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-2">
-            {user?.name && <h1 className="text-3xl font-bold">{user.name}</h1>}
+            {user?.name && (
+              <h1 className="text-xl xs:text-3xl font-bold">{user.name}</h1>
+            )}
             {user?.verified && (
               <CheckCircle fill="var(--color-indigo-400)" color="black" />
             )}
           </div>
-          <div className="md:flex">
+          <div className="md:flex text-sm xs:text-base">
             <Stats stats={user?.stats} />
           </div>
           {user?.category && (
