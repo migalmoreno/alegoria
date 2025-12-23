@@ -78,7 +78,7 @@ export const ImagePost = <T,>({
                 />
               )}
             </div>
-            <div className="md:border-l border-neutral-800 lg:w-[300px] shrink-0 md:p-0 flex flex-col gap-y-2 py-4 p-2">
+            <div className="md:border-l border-neutral-800 md:w-[300px] md:shrink-0 md:p-0 flex flex-col gap-y-2 py-4 p-2">
               <div className="md:border-b border-neutral-800 md:p-4 flex gap-x-2 items-center px-2">
                 {data.authorThumbnail && (
                   <UserAvatar
@@ -106,9 +106,10 @@ export const ImagePost = <T,>({
                 )}
               </div>
               {data.description && (
-                <div className="px-2 lg:px-4 text-sm/6 text-neutral-200">
-                  {data.description}
-                </div>
+                <span
+                  className="px-2 lg:px-4 text-sm/6 text-neutral-200 [overflow-wrap:anywhere]"
+                  dangerouslySetInnerHTML={{ __html: data.description }}
+                ></span>
               )}
             </div>
           </div>
