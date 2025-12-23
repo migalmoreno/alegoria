@@ -19,7 +19,7 @@ interface MenuLinkProps {
 const MenuLink = ({ link, label, icon }: MenuLinkProps) => {
   return (
     <Link href={link}>
-      <div className="flex gap-x-4 hover:bg-neutral-900 rounded-md w-full p-2 transition-colors">
+      <div className="flex gap-x-6 hover:bg-neutral-900 rounded-md w-full p-2 transition-colors">
         {icon}
         <span>{label}</span>
       </div>
@@ -35,7 +35,8 @@ const Menu = () => {
       </div>
       <div className="border-t border-neutral-800 p-2">
         <span className="flex py-4 p-2 text-sm text-neutral-300">
-          Version: {APP_VERSION}-{abbreviatedSha}
+          Version: {APP_VERSION}
+          {abbreviatedSha ? `-${abbreviatedSha}` : ""}
         </span>
       </div>
     </div>
@@ -54,6 +55,10 @@ export const Sidebar = () => {
       if (categories) {
         dispatch({ type: "setCategories", categories });
         const enabledCategories = [
+          {
+            name: "url",
+            subcategories: [],
+          },
           ...categories
             .filter((category: Category) =>
               Object.keys(pageSchema).includes(category.name),
@@ -66,10 +71,6 @@ export const Sidebar = () => {
                 ).includes(subcategory.name),
               ),
             })),
-          {
-            name: "url",
-            subcategories: [],
-          },
         ];
         dispatch({
           type: "setEnabledCategories",
