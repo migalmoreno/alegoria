@@ -2,8 +2,9 @@ import { useFetchOnScroll } from "../../hooks";
 import { URLExtractor } from "../posts/User";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { PostExtractor, UserExtractor } from "../../types";
-import { PostContainer } from "./PostContainer";
-import { UserPageGalleryContainer } from "./UserGallery";
+import { ImagePostContainer } from "./PostContainer";
+import { ItemsContainer } from "./UserItems";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -22,7 +23,7 @@ export const UserPageStreamPost = <T,>({
   });
 
   return (
-    <PostContainer
+    <ImagePostContainer
       post={data}
       extractor={extractor}
       extraClassName={
@@ -63,19 +64,27 @@ export const UserPagePosts = <T,>({
     }
   };
 
-  const { data, hasNextPage, isPending, isFetchingNextPage, fetchNextPage } =
-    useInfiniteQuery({
-      queryKey: ["user", "posts", url],
-      queryFn: ({ pageParam }) => {
-        return fetchPosts(pageParam);
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, _, lastPageParam) => {
-        return lastPage?.metadata.length && lastPage?.metadata.length > 0
-          ? lastPageParam + 1
-          : undefined;
-      },
-    });
+  const {
+    data,
+    hasNextPage,
+    isPending,
+    isFetchingNextPage,
+    fetchNextPage,
+    isFetchNextPageError,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ["user", "posts", url],
+    queryFn: ({ pageParam }) => {
+      return fetchPosts(pageParam);
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      return lastPage?.metadata.length && lastPage?.metadata.length > 0
+        ? lastPageParam + 1
+        : undefined;
+    },
+  });
 
   const urls = data?.pages.flatMap((page) => page.urls);
   const posts: URLPostExtractor<T>[] = urls
@@ -109,11 +118,21 @@ export const UserPagePosts = <T,>({
     hasNextPage && !isFetchingNextPage && !isPending,
   );
 
+  if (isError) {
+    toast.error(error.message, {
+      description: error.cause ? String(error.cause) : undefined,
+      className: "!bg-red-900",
+    });
+  }
+
   return (
-    <UserPageGalleryContainer hasNextPage={hasNextPage} ref={ref}>
+    <ItemsContainer
+      hasNextPage={hasNextPage && !isFetchNextPageError}
+      ref={ref}
+    >
       {posts?.map((ext, i) => (
         <UserPageStreamPost key={i} url={ext.url} extractor={ext.extractor} />
       ))}
-    </UserPageGalleryContainer>
+    </ItemsContainer>
   );
 };

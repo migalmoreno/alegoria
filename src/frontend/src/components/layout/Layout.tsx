@@ -3,6 +3,7 @@ import { Navbar } from "./Navbar";
 import { MobileMenu, Sidebar } from "./Sidebar";
 import { useEffect } from "react";
 import { LoadingBarContainer } from "react-top-loading-bar";
+import { Toaster } from "sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,6 +41,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <LoadingBarContainer>
+      <Toaster visibleToasts={1} theme="dark" />
       <div className="flex flex-col h-full">
         <Navbar />
         <div className="flex flex-auto bg-black">
