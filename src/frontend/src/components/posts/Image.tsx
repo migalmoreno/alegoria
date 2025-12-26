@@ -2,11 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "wouter";
 import { Image, PostResponse, Video, YtdlItem } from "../../types";
 import { formatTimeAgo } from "../../utils";
-import { UserAvatar } from "../UserAvatar";
+import { UserAvatar, ErrorContainer } from "../layout";
 import ShakaVideo from "shaka-video-element/react";
 import { useEffect, useRef } from "react";
 import CustomVideoElement from "shaka-video-element";
-import { ErrorContainer } from "../ErrorContainer";
 
 export interface ImagePostProps<T> {
   extractor: (data: T) => Image;
