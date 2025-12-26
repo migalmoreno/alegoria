@@ -6,7 +6,7 @@ import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { Category, Extractor, SubCategory } from "~/types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 export const SharedNavbarSubMenu = () => {
   const [showMobileMenu, dispatch] = useAppStore(
@@ -38,7 +38,7 @@ interface SearchSelectProps {
 
 const SearchSelect = ({ value, onChange, children }: SearchSelectProps) => (
   <select
-    className="appearance-none bg-neutral-200 rounded-2xl px-2 flex items-center text-center text-neutral-700 text-xs h-7 font-medium cursor-pointer outline-none"
+    className="appearance-none bg-neutral-200 rounded-md px-2 flex items-center text-center text-neutral-700 text-xs h-6 font-medium cursor-pointer outline-none"
     value={value}
     onChange={onChange}
   >
@@ -53,6 +53,7 @@ export interface Inputs {
 const SearchForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
   const [_, navigate] = useLocation();
+  const [isCategorySelected, setCategorySelected] = useState<boolean>();
 
   const [categories, activeCategory, activeSubCategory, dispatch] = useAppStore(
     useShallow((state) => [
@@ -67,7 +68,8 @@ const SearchForm = () => {
     enabled:
       !!activeCategory &&
       activeCategory.subcategories.length > 0 &&
-      !!activeSubCategory,
+      !!activeSubCategory &&
+      !!isCategorySelected,
     queryKey: [
       `/extractors?category=${activeCategory?.name}&subcategory=${activeSubCategory?.name}`,
     ],
@@ -94,16 +96,25 @@ const SearchForm = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <input
-            className="outline-none pr-36 w-full"
+            className="outline-none pr-40 w-full"
             placeholder="Search"
+            onFocus={() => {
+              setCategorySelected(true);
+            }}
+            onInput={() => {
+              setCategorySelected(true);
+            }}
             {...register("searchValue", { required: true })}
           />
-          <Button icon={<SearchIcon />} type="submit" extraClassName="!p-0" />
+          <button type="submit" className="cursor-pointer">
+            <SearchIcon size={18} />
+          </button>
         </form>
-        <div className="flex gap-x-1 absolute top-1.75 right-14 items-center">
+        <div className="flex gap-x-1 absolute top-2.5 right-12 items-center">
           <SearchSelect
             value={activeCategory?.name}
             onChange={(e) => {
+              setCategorySelected(true);
               const category = categories.find(
                 (category) => category.name === e.target.value,
               ) as Category;
@@ -167,21 +178,16 @@ export const Navbar = () => {
       ) : (
         <SharedNavbarSubMenu />
       )}
-      <div className="hidden md:flex items-center justify-center w-full md:absolute z-0">
+      <div
+        className={`hidden md:flex ${showSearchForm ? "!flex !md:hidden" : ""} items-center justify-center w-full md:absolute z-0`}
+      >
         <SearchForm />
       </div>
-
-      {showSearchForm ? (
-        <div className="flex md:hidden w-full">
-          <SearchForm />
-        </div>
-      ) : (
-        <Button
-          extraClassName="md:hidden"
-          icon={<SearchIcon />}
-          onClick={() => dispatch({ type: "showSearchForm", show: true })}
-        />
-      )}
+      <Button
+        extraClassName={`md:hidden ${showSearchForm ? "hidden" : ""}`}
+        icon={<SearchIcon />}
+        onClick={() => dispatch({ type: "showSearchForm", show: true })}
+      />
     </div>
   );
 };
