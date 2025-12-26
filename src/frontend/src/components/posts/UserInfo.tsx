@@ -1,9 +1,8 @@
 import { CheckCircle, LinkIcon } from "lucide-react";
-import { InfoExtractor, PostResponse, UserInfo, UserStats } from "../../types";
+import { UserInfoExtractor, PostResponse, UserStats } from "../../types";
 import { formatNumber } from "../../utils";
 import { useQuery } from "@tanstack/react-query";
-import { UserAvatar } from "../UserAvatar";
-import { ErrorContainer } from "../ErrorContainer";
+import { UserAvatar, ErrorContainer } from "../layout";
 
 interface StatsItemProps {
   label: string;
@@ -42,19 +41,33 @@ const Stats = ({ stats }: { stats?: UserStats }) => {
   );
 };
 
-const UserPageInfoContainer = ({
-  user,
-  isPending,
-}: {
-  user?: UserInfo;
-  isPending: boolean;
-}) => {
+interface UserInfoProps<T> {
+  data: PostResponse<T>;
+  url: string;
+  extractor: UserInfoExtractor<T>;
+}
+
+export const UserInfo = <T,>({ url, extractor }: UserInfoProps<T>) => {
+  const {
+    data: user,
+    isPending,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: [`/posts/${encodeURIComponent(extractor.fetchUrl || url)}`],
+    select: (user: T) => extractor.extractor(user),
+  });
+
+  if (isError) {
+    return <ErrorContainer error={error} />;
+  }
+
   return (
     <div className="flex flex-col border-b border-neutral-800">
       <div className="flex gap-x-4 py-6 px-6">
         <UserAvatar
           thumbnail={user?.thumbnail}
-          extraClassNames={`bg-neutral-800 h-24 w-24 sm:h-36 sm:w-36 ${isPending ? "animate-[pulse_0.7s_ease-in-out_infinite]" : ""}`}
+          extraClassNames={`border border-neutral-800 bg-neutral-800 h-24 w-24 sm:h-36 sm:w-36 ${isPending ? "animate-[pulse_0.7s_ease-in-out_infinite]" : ""}`}
         />
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-2">
@@ -96,28 +109,4 @@ const UserPageInfoContainer = ({
       )}
     </div>
   );
-};
-
-interface UserPageInfoProps<T> {
-  data: PostResponse<T>;
-  url: string;
-  extractor: InfoExtractor<T>;
-}
-
-export const UserPageInfo = <T,>({ url, extractor }: UserPageInfoProps<T>) => {
-  const {
-    data: user,
-    isPending,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: [`/posts/${encodeURIComponent(extractor.fetchUrl || url)}`],
-    select: (user: T) => extractor.extractor(user),
-  });
-
-  if (isError) {
-    return <ErrorContainer error={error} />;
-  }
-
-  return <UserPageInfoContainer isPending={isPending} user={user} />;
 };

@@ -1,16 +1,12 @@
-import {
-  BoardExtractor,
-  GalleryExtractor,
-  PostResponse,
-  UserExtractor,
-} from "../../types";
+import { PostResponse, UserExtractor } from "../../types";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { UserPageInfo } from "./UserInfo";
-import { UserGallery } from "./UserGallery";
-import { UserPagePosts } from "./UserPost";
-import { ErrorContainer } from "../ErrorContainer";
-import { UserBoard } from "./UserBoard";
+import { UserInfo } from "./UserInfo";
+import { Gallery } from "./Gallery";
+import { ErrorContainer } from "../layout";
+import { MediaBoard, GroupBoard } from "./Board";
+import { ItemsContainer, ItemsPaginationContainer } from "./Items";
+import { DynamicImagePost } from "./PostContainer";
 
 export interface URLUserExtractor<T> {
   url: string;
@@ -22,11 +18,11 @@ export interface URLExtractor<T> {
   urls: URLUserExtractor<T>[];
 }
 
-const UserExtractorsContainer = <T,>({
-  extractors,
-}: {
+export interface UserPostProps<T> {
   extractors: UserExtractor<T>[];
-}) => {
+}
+
+export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
   const { url } = useParams();
   const { data, isError, error } = useQuery<PostResponse<T>>({
     queryKey: [`/posts/${encodeURIComponent(String(url))}`],
@@ -39,7 +35,7 @@ const UserExtractorsContainer = <T,>({
   }
 
   const urlExtractors: URLUserExtractor<T>[] | undefined = data?.urls
-    .reduce(
+    ?.reduce(
       (acc: URLExtractor<T>, curr: string) => {
         const matchExt = acc.extractors?.find((ext) =>
           ext.urlMatcher?.test(curr),
@@ -91,22 +87,31 @@ const UserExtractorsContainer = <T,>({
         dataExtractors?.length > 0 &&
         dataExtractors.map((ext, i) => {
           switch (ext.type) {
-            case "board":
+            case "group-board":
               return (
-                <UserBoard
+                <GroupBoard
                   key={i}
                   data={data}
                   url={String(url)}
-                  extractor={ext as BoardExtractor<T>}
+                  extractor={ext}
+                />
+              );
+            case "media-board":
+              return (
+                <MediaBoard
+                  key={i}
+                  data={data}
+                  url={String(url)}
+                  extractor={ext}
                 />
               );
             case "gallery":
               return (
-                <UserGallery
+                <Gallery
                   key={i}
                   data={data}
                   url={String(url)}
-                  extractor={ext as GalleryExtractor<T>}
+                  extractor={ext}
                 />
               );
           }
@@ -118,7 +123,7 @@ const UserExtractorsContainer = <T,>({
           switch (ext.extractor.type) {
             case "info":
               return (
-                <UserPageInfo
+                <UserInfo
                   key={i}
                   data={data}
                   url={ext.url}
@@ -127,26 +132,20 @@ const UserExtractorsContainer = <T,>({
               );
             case "gallery":
               return (
-                <UserGallery key={i} url={ext.url} extractor={ext.extractor} />
+                <Gallery key={i} url={ext.url} extractor={ext.extractor} />
               );
           }
         })}
-      {postExtractors?.length > 0 && url && (
-        <UserPagePosts url={url} extractors={extractors} />
+      {postExtractors?.length > 0 && url && data && (
+        <ItemsContainer
+          url={url}
+          extractors={postExtractors}
+          itemsContainerComponent={<ItemsPaginationContainer />}
+          itemRenderer={(post) => (
+            <DynamicImagePost extractor={postExtractors[0]} url={post.url} />
+          )}
+        />
       )}
     </div>
   );
-};
-
-export interface UserPostProps<T> {
-  extractors?: UserExtractor<T>[];
-}
-
-export const UserPost = <T extends PostResponse<T>>({
-  extractors,
-}: UserPostProps<T>) => {
-  if (extractors) {
-    return <UserExtractorsContainer extractors={extractors} />;
-  }
-  return <>No extractors found for this user</>;
 };

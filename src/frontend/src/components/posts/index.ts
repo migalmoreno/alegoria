@@ -1,2 +1,5 @@
-export { UserPost } from "./User";
-export { ImagePost } from "./Image";
+export * from "./User";
+export * from "./Image";
+export * from "./Search";
+export * from "./Gallery";
+export * from "./Board";

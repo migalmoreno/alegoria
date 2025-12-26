@@ -1,17 +1,12 @@
-export interface UserImagePost {
-  thumbnail: string;
-  url: string;
-}
+import {
+  BaseExtractor,
+  BoardPost,
+  ImagePost,
+  ItemsExtractor,
+  PostExtractor,
+} from "./extractors";
 
-export interface UserBoardPost {
-  name: string;
-  thumbnail: string;
-  url: string;
-  count?: number;
-  date?: Date;
-}
-
-export type UserItem = UserImagePost | UserBoardPost;
+export type UserItem = ImagePost | BoardPost;
 
 export interface UserStats {
   mediaCount?: number;
@@ -20,7 +15,7 @@ export interface UserStats {
   likeCount?: number;
 }
 
-export interface UserInfo {
+export interface Info {
   thumbnail?: string;
   name?: string;
   nickname?: string;
@@ -32,43 +27,16 @@ export interface UserInfo {
   private?: boolean;
 }
 
-export interface User extends UserInfo {
+export interface User extends Info {
   posts: UserItem[];
 }
 
-interface BaseExtractor {
-  fetchUrl?: string;
-  urlMatcher?: RegExp;
-  unique?: true;
-  originalUrl?: boolean;
-  type: string;
-}
-
-export interface InfoExtractor<T> extends BaseExtractor {
+export interface UserInfoExtractor<T> extends BaseExtractor {
   type: "info";
-  extractor: (data: T) => UserInfo;
+  extractor: (data: T) => Info;
 }
-
-export interface GalleryExtractor<T> extends BaseExtractor {
-  type: "gallery";
-  extractor: (data: T) => UserImagePost[];
-}
-
-export interface PostExtractor<T> extends BaseExtractor {
-  type: "post";
-  extractor: (data: T) => UserImagePost;
-}
-
-export interface BoardExtractor<T> extends BaseExtractor {
-  type: "board";
-  extractor: (data: T) => UserBoardPost[];
-}
-
-export type ItemsExtractor<T> = (GalleryExtractor<T> | BoardExtractor<T>) & {
-  batch?: boolean;
-};
 
 export type UserExtractor<T> =
-  | InfoExtractor<T>
+  | UserInfoExtractor<T>
   | ItemsExtractor<T>
   | PostExtractor<T>;
