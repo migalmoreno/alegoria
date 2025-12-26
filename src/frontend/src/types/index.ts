@@ -11,3 +11,5 @@ export * from "./image";
 export * from "./ytdl";
 export * from "./patreon";
 export * from "./pinterest";
+export * from "./extractors";
+export * from "./search";

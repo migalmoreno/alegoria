@@ -8,6 +8,7 @@ import { ImagePostProps } from "~/components/posts/Image";
 import { DirectLinkItem } from "./directlink";
 import { PatreonItem } from "./patreon";
 import { PinterestBoardItem, PinterestImageItem } from "./pinterest";
+import { SearchPostProps } from "~/components/posts";
 
 export type Post<
   T extends {
@@ -19,6 +20,7 @@ export type Post<
     board?: T["board"];
     pin?: T["pin"];
     created?: T["created"];
+    search?: T["search"];
   },
 > = {
   user?: T["user"];
@@ -29,6 +31,7 @@ export type Post<
   board?: T["board"];
   pin?: T["pin"];
   created?: T["created"];
+  search?: T["search"];
 };
 
 export interface SubCategoryProps<T extends Post<T>> {
@@ -40,6 +43,7 @@ export interface SubCategoryProps<T extends Post<T>> {
   board?: UserPostProps<T["board"]>;
   pin?: ImagePostProps<T["pin"]>;
   created?: UserPostProps<T["board"]>;
+  search?: SearchPostProps<T["search"]>;
 }
 
 interface VscoCategory {
@@ -71,6 +75,7 @@ interface PinterestCategory {
   board: PostResponse<PinterestImageItem>;
   pin: PostResponse<PinterestImageItem>;
   created: PostResponse<PinterestBoardItem>;
+  search: PostResponse<PinterestImageItem>;
 }
 
 export interface CategoryConfig {

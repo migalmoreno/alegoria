@@ -1,7 +1,7 @@
 import { Link, useParams } from "wouter";
 import { CategoryConfig, Extractor, Post, SubCategoryProps } from "~/types";
 import { pageSchema } from "~/page-schema";
-import { UserPost, ImagePost } from "../posts";
+import { UserPost, ImagePost, SearchPost, SearchPostProps } from "../posts";
 import { useQuery } from "@tanstack/react-query";
 import { useLoadingBar } from "react-top-loading-bar";
 import { UserPostProps } from "../posts/User";
@@ -38,27 +38,18 @@ export const PostPage = <T extends Post<T>>() => {
 
     if (schemaProps) {
       switch (subcategory as keyof SubCategoryProps<T>) {
-        case "user": {
-          return <UserPost {...(schemaProps as UserPostProps<T["user"]>)} />;
-        }
-        case "board": {
-          return <UserPost {...(schemaProps as UserPostProps<T["board"]>)} />;
-        }
-        case "created": {
-          return <UserPost {...(schemaProps as UserPostProps<T["created"]>)} />;
-        }
-        case "creator": {
-          return <UserPost {...(schemaProps as UserPostProps<T["creator"]>)} />;
-        }
+        case "search":
+          return <SearchPost {...(schemaProps as SearchPostProps<T>)} />;
+        case "user":
+        case "board":
+        case "created":
+        case "creator":
+          return <UserPost {...(schemaProps as UserPostProps<T>)} />;
         case "photo":
-          return <ImagePost {...(schemaProps as ImagePostProps<T["photo"]>)} />;
         case "post":
-          return <ImagePost {...(schemaProps as ImagePostProps<T["post"]>)} />;
-        case "image": {
-          return <ImagePost {...(schemaProps as ImagePostProps<T["image"]>)} />;
-        }
+        case "image":
         case "pin": {
-          return <ImagePost {...(schemaProps as ImagePostProps<T["pin"]>)} />;
+          return <ImagePost {...(schemaProps as ImagePostProps<T>)} />;
         }
       }
     }
