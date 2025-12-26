@@ -10,7 +10,7 @@ from gallery_dl import config
 from yt_dlp import DownloadError
 from flask import Blueprint, request, jsonify, make_response, Response
 from urllib.parse import unquote
-from alegoria.downloader import download_post, UnsupportedURLError
+from alegoria.downloader import download_post
 from http import HTTPStatus
 
 
