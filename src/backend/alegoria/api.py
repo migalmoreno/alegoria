@@ -175,26 +175,40 @@ def get_extractors():
     return make_response("Not found", HTTPStatus.NOT_FOUND)
 
 
+def apply_extractor_config(category, subcategory, pagination):
+    match (category, subcategory):
+        case ("tiktok", "user"):
+            config.set(
+                (
+                    "extractor",
+                    "tiktok",
+                    "user",
+                ),
+                "tiktok-range",
+                pagination,
+            )
+        case ("pinterest", "user"):
+            config.set(("extractor",), "chapter-range", pagination)
+        case _:
+            config.set(("extractor",), "image-range", pagination)
+
+
 @api_v1.route("/posts/<path:url>")
 def posts(url=""):
     items_per_page = request.args.get("limit", default=10, type=int)
-    pagination_start = request.args.get("skip", default=0, type=int)
-    pagination_end = pagination_start + items_per_page - 1
-    batch_mode = request.args.get("batch", default=False, type=bool)
-    parsed_url = unquote(url)
-    config.set(("extractor",), "image-range", f"{pagination_start}-{pagination_end}")
-    # config.set(("extractor",), "chapter-range", f"{pagination_start}-{pagination_end}")
-    config.set(
-        (
-            "extractor",
-            "tiktok",
-            "user",
-        ),
-        "tiktok-range",
-        f"{pagination_start}-{pagination_end}",
+    pagination_start = request.args.get("skip", default=1, type=int)
+    pagination_end = (
+        pagination_start + items_per_page - (0 if pagination_start == 1 else 1)
     )
-    try:
-        post = download_post(parsed_url, batch_mode)
-        return make_response(post)
-    except UnsupportedURLError:
-        return make_response({"error": "UnsupportedURLError"}, HTTPStatus.BAD_REQUEST)
+    parsed_url = unquote(url)
+    extractor = find_extractor(parsed_url)
+
+    if extractor:
+        apply_extractor_config(
+            extractor._cfgpath[1],
+            extractor._cfgpath[2],
+            f"{pagination_start}-{pagination_end}",
+        )
+
+    post = download_post(parsed_url)
+    return make_response(post)
