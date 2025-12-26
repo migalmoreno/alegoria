@@ -2,15 +2,33 @@ import { CategoryConfig } from "./types";
 
 export const pageSchema: CategoryConfig = {
   pinterest: {
+    search: {
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data) =>
+            data.metadata.map((post) => ({
+              thumbnail: post.url,
+              url: `https://www.pinterest.com/pin/${post.id}`,
+              authorName: post.pinner.username,
+              authorThumbnail: post.pinner.image_small_url,
+              authorUrl: `https://www.pinterest.com/${post.pinner.username}`,
+              groupName: post.board?.name,
+              groupThumbnail: post.board?.image_cover_url,
+              groupUrl: `https://www.pinterest.com${post.board?.url}`,
+            })),
+        },
+      ],
+    },
     user: {
       extractors: [
         {
-          type: "board",
+          type: "group-board",
           extractor: (data) =>
             data.metadata.map((post) => ({
               name: post.name,
               thumbnail: post.image_cover_url,
-              url: `https://pinterest.com${encodeURIComponent(post.url)}`,
+              url: `https://www.pinterest.com${encodeURIComponent(post.url)}`,
               count: post.pin_count,
               date: new Date(post.created_at),
             })),
@@ -24,7 +42,7 @@ export const pageSchema: CategoryConfig = {
           extractor: (data) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://pinterest.com${post.seo_url}`,
+              url: `https://www.pinterest.com${post.seo_url}`,
             })),
         },
       ],
@@ -36,19 +54,22 @@ export const pageSchema: CategoryConfig = {
           extractor: (data) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://pinterest.com${post.seo_url}`,
+              url: `https://www.pinterest.com${post.seo_url}`,
             })),
         },
       ],
     },
     pin: {
       extractor: (data) => ({
-        url: data.metadata[0].images.orig.url,
-        user: data.metadata[0].pinner.username,
+        url: `${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${data.metadata[0].url}`,
+        authorName: data.metadata[0].pinner.username,
         authorThumbnail: data.metadata[0].pinner.image_small_url,
-        authorUrl: `https://pinterest.com/${data.metadata[0].pinner.username}`,
+        authorUrl: `https://www.pinterest.com/${data.metadata[0].pinner.username}`,
         description: data.metadata[0].description,
         date: new Date(data.metadata[0].created_at),
+        groupName: data.metadata[0].board.name,
+        groupThumbnail: data.metadata[0].board.image_cover_url,
+        groupUrl: `https://www.pinterest.com${data.metadata[0].board.url}`,
       }),
     },
   },

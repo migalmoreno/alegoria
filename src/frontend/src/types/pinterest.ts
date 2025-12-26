@@ -65,6 +65,7 @@ export interface PinterestBoardItem {
   id: string;
   image_cover_hd_url: string;
   image_cover_url: string;
+  image_thumbnail_url: string;
   is_ads_only: boolean;
   is_collaborative: boolean;
   name: string;
