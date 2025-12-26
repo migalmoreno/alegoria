@@ -2,7 +2,6 @@ import requests
 import os
 import json
 import tempfile
-import sys, inspect
 from gallery_dl.exception import GalleryDLException, NotFoundError
 from gallery_dl.extractor import extractors, find as find_extractor
 from werkzeug.exceptions import HTTPException
@@ -150,73 +149,28 @@ def get_extractors():
         if extractor:
             category = extractor.category
             subcategory = extractor.subcategory
-        else:
-            return make_response("Bad request", HTTPStatus.BAD_REQUEST)
 
     for extractor_group in groups:
         if extractor_group["category"] == category:
-            if subcategory is None:
-                module = sys.modules[extractor_group["subcategories"][0].__module__]
-                subcategories = []
-
-                base_extractor = None
-                for _, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj):
-                        for c in obj.__bases__:
-                            if c.__name__ == "Extractor":
-                                base_extractor = obj
-
-                for sub in extractor_group["subcategories"]:
-                    subcategories.append(
-                        {
-                            "description": sub.__doc__,
-                            "name": sub.subcategory,
-                            "example": sub.example,
-                            "root": sub.root,
-                        }
-                    )
-
+            extractor = next(
+                (
+                    x
+                    for x in extractor_group["subcategories"]
+                    if x.subcategory == subcategory
+                ),
+                extractor_group["subcategories"][0],
+            )
+            if match := extractor.pattern.match(extractor.example):
+                extractor_instance = extractor(match)
                 return make_response(
                     {
-                        "description": module.__doc__,
-                        "name": category,
-                        "subcategories": subcategories,
-                        "root": base_extractor.root if base_extractor else None,
-                        "domains": (
-                            list(module.DOMAINS) if hasattr(module, "DOMAINS") else []
-                        ),
-                        "legacy_domains": (
-                            list(module.LEGACY_DOMAINS)
-                            if hasattr(module, "LEGACY_DOMAINS")
-                            else []
-                        ),
-                        "base_pattern": (
-                            module.BASE_PATTERN
-                            if hasattr(module, "BASE_PATTERN")
-                            else None
-                        ),
+                        "category": category,
+                        "subcategory": extractor.subcategory,
+                        "url": extractor_instance.url,
+                        "groups": extractor_instance.groups,
+                        "configPath": extractor_instance._cfgpath,
                     }
                 )
-            else:
-                extractor = next(
-                    (
-                        x
-                        for x in extractor_group["subcategories"]
-                        if x.subcategory == subcategory
-                    ),
-                    extractor_group["subcategories"][0],
-                )
-                if match := extractor.pattern.match(extractor.example):
-                    extractor_instance = extractor(match)
-                    return make_response(
-                        {
-                            "category": category,
-                            "subcategory": extractor.subcategory,
-                            "url": extractor_instance.url,
-                            "groups": extractor_instance.groups,
-                            "configPath": extractor_instance._cfgpath,
-                        }
-                    )
 
     return make_response("Not found", HTTPStatus.NOT_FOUND)
 

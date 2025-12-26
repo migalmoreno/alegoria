@@ -1,5 +1,5 @@
 import { Route, Router, Switch } from "wouter";
-import { CategoryPage, HomePage, PostPage, Layout } from "./components";
+import { HomePage, PostPage, Layout } from "./components";
 import {
   QueryClient,
   QueryClientProvider,
@@ -39,7 +39,6 @@ function App() {
             <Switch>
               <Route path="/" component={HomePage} />
               <Route path="/post/:url" component={PostPage} />
-              <Route path="/category/:category" component={CategoryPage} />
               <Route>
                 <div className="flex-auto flex flex-col items-center justify-center min-h-full min-w-full gap-y-4">
                   <h1 className="text-3xl sm:text-4xl font-extrabold">404</h1>
