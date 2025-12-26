@@ -4,7 +4,6 @@ interface ImageMeta {
 
 export interface Image {
   url: string;
-  user: string;
   category?: string;
   subcategory?: string;
   extension?: string;
@@ -14,9 +13,13 @@ export interface Image {
   description?: string;
   meta?: ImageMeta;
   authorThumbnail?: string;
+  authorName?: string;
   authorUrl?: string;
   videoUrl?: string;
   type?: string;
+  groupName?: string;
+  groupUrl?: string;
+  groupThumbnail?: string;
 }
 
 export interface Video {

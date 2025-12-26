@@ -78,30 +78,51 @@ export const ImagePost = <T,>({
               )}
             </div>
             <div className="md:border-l border-neutral-800 md:w-[300px] md:shrink-0 md:p-0 flex flex-col gap-y-2 py-4 p-2">
-              <div className="md:border-b border-neutral-800 md:p-4 flex gap-x-2 items-center px-2">
-                {data.authorThumbnail && (
-                  <UserAvatar
-                    thumbnail={data.authorThumbnail}
-                    extraClassNames="h-10 w-10"
-                  />
-                )}
-                {data.authorUrl ? (
-                  <Link
-                    href={`/post/${encodeURIComponent(data.authorUrl)}`}
-                    className="font-semibold text-sm"
-                  >
-                    {data.user}
-                  </Link>
-                ) : (
-                  <span className="font-semibold text-sm">{data.user}</span>
-                )}
-                {data.date && (
-                  <span
-                    className="text-neutral-400 text-sm shrink-0"
-                    title={data.date.toLocaleString()}
-                  >
-                    {formatTimeAgo(data.date)}
-                  </span>
+              <div className="md:border-b border-neutral-800 md:p-4 flex gap-x-2 gap-y-4 items-center px-2 justify-between md:justify-normal md:flex-wrap text-sm">
+                <div className="flex items-center gap-x-2">
+                  {data.authorThumbnail && (
+                    <UserAvatar
+                      thumbnail={data.authorThumbnail}
+                      extraClassNames="h-10 w-10 border border-neutral-800"
+                    />
+                  )}
+                  {data.authorUrl ? (
+                    <Link
+                      href={`/post/${encodeURIComponent(data.authorUrl)}`}
+                      className="font-semibold"
+                    >
+                      {data.authorName}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold">{data.authorName}</span>
+                  )}
+                  {data.date && (
+                    <span
+                      className="text-neutral-400 shrink-0"
+                      title={data.date.toLocaleString()}
+                    >
+                      {formatTimeAgo(data.date)}
+                    </span>
+                  )}
+                </div>
+                {data.groupName && (
+                  <div className="flex gap-x-2 items-center">
+                    In
+                    <Link
+                      className="flex gap-x-2 text-neutral-100 font-medium items-center"
+                      href={
+                        data?.groupUrl
+                          ? `/post/${encodeURIComponent(data?.groupUrl)}`
+                          : ""
+                      }
+                    >
+                      <UserAvatar
+                        extraClassNames="h-6 w-6"
+                        thumbnail={data?.groupThumbnail}
+                      />
+                      <span className="line-clamp-1">{data?.groupName}</span>
+                    </Link>
+                  </div>
                 )}
               </div>
               {data.description && (

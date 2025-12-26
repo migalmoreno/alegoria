@@ -69,8 +69,8 @@ export const pageSchema: CategoryConfig = {
     post: {
       extractor: (data) => ({
         url: data.metadata[0].thumbnail.original,
-        user: data.metadata[0].creator.vanity,
         description: data.metadata[0].content,
+        authorName: data.metadata[0].creator.vanity,
         authorUrl: data.metadata[0].creator.url,
         authorThumbnail: data.metadata[0].campaign.avatar_photo_url,
       }),
@@ -93,9 +93,9 @@ export const pageSchema: CategoryConfig = {
     photo: {
       extractor: (data) => ({
         url: data.metadata[0].url,
-        user: data.metadata[0].username,
         description: data.metadata[0].caption,
         date: new Date(data.metadata[0].date),
+        authorName: data.metadata[0].username,
         authorUrl: `https://www.facebook.com/${data.metadata[0].user_id}`,
       }),
     },
@@ -125,7 +125,7 @@ export const pageSchema: CategoryConfig = {
     image: {
       extractor: (data) => ({
         url: data.urls[0],
-        user: data.post[0].user,
+        authorName: data.post[0].user,
         filename: data.metadata[0].filename,
         date: new Date(data.metadata[0].date),
         description: data.metadata[0].description,
@@ -214,11 +214,11 @@ export const pageSchema: CategoryConfig = {
     post: {
       extractor: (data) => ({
         url: data.post[0].video.cover,
-        user: data.post[0].user,
         filename: data.metadata[0].filename,
         date: new Date(data.post[0].date),
         description: data.post[0].desc,
         type: data.metadata[0].type,
+        authorName: data.post[0].user,
         authorUrl: `https://tiktok.com/@${data.post[0].user}`,
         authorThumbnail: data.post[0].author.avatarThumb,
         videoUrl: data.urls[0],
