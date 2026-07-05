@@ -4,8 +4,8 @@ RUN apk --no-cache add git
 
 WORKDIR /app
 
-COPY package.json /app/
-RUN yarn install
+COPY package.json yarn.lock /app/
+RUN yarn install --frozen-lockfile --network-timeout 0
 
 COPY . /app
 RUN yarn build
