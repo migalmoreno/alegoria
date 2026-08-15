@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker-publish:
-    runs-on: auriga
+    runs-on: cygnus
     steps:
       - name: Checkout
         uses: actions/checkout@v4
