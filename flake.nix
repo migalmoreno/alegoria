@@ -24,6 +24,7 @@
               unset PYTHONPATH
               uv sync
               . .venv/bin/activate
+              yarn install
             '';
           };
           process-compose.default = {

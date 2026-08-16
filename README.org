@@ -1,6 +1,6 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
 #+OPTIONS: toc:nil num:nil
-#+title: Alegoria
+#+title: alegoria
 Alegoria is a web front-end to image galleries and collections from several hosting sites. To add support for the rest of [[https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md][supported sites]], follow the extraction logic in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
 
 * Installation
@@ -13,3 +13,17 @@ docker compose up -d
 
 * Configuration
 You can edit the default gallery-dl [[file:src/frontend/public/config.json][config.json]] file locally with the [[https://gdl-org.github.io/docs/configuration.html][supported configuration options]], such as to change the extractors browser, the included subcategories, the order of posts, and so on.
+
+* Development Setup
+Enter the dev shell to install dependencies:
+
+#+begin_src sh
+nix develop
+#+end_src
+
+Then start the front-end and back-end processes with this:
+
+#+begin_src sh
+# Add `-- -D` if you want to detach the processes
+nix run .
+#+end_src
