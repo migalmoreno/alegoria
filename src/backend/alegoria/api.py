@@ -13,6 +13,8 @@ from urllib.parse import unquote
 from alegoria.downloader import download_post
 from http import HTTPStatus
 
+_extractors = list(extractors())
+
 
 api_v1 = Blueprint("API_v1", __name__)
 
@@ -110,7 +112,7 @@ def proxy():
 
 def get_grouped_extractors():
     groups = []
-    for k, g in groupby(extractors(), key=lambda ext: ext.basecategory or ext.category):
+    for k, g in groupby(_extractors, key=lambda ext: ext.basecategory or ext.category):
         exts = []
         for ext in g:
             exts.append(
@@ -131,12 +133,16 @@ def get_categories():
     return make_response(get_grouped_extractors())
 
 
+def get_extractors_by_category():
+    groups = []
+    for k, g in groupby(_extractors, key=lambda ext: ext.category or ext.basecategory):
+        groups.append({"category": k, "subcategories": list(g)})
+    return groups
+
+
 @api_v1.route("/extractors")
 def get_extractors():
-    groups = []
-
-    for k, g in groupby(extractors(), key=lambda ext: ext.category or ext.basecategory):
-        groups.append({"category": k, "subcategories": list(g)})
+    groups = get_extractors_by_category()
 
     category = None
     subcategory = None
