@@ -36,6 +36,7 @@ interface ItemsContainerProps<T> {
   data?: PostResponse<T>;
   url: string;
   extractors: ItemsExtractor<T>[];
+  baseUrl?: string;
   itemsContainerComponent: ReactElement;
   itemRenderer: (item: UserItem | URLUserExtractor<T>) => React.ReactElement;
 }
@@ -44,6 +45,7 @@ export const ItemsContainer = <T,>({
   data: initialData,
   url,
   extractors,
+  baseUrl,
   itemsContainerComponent,
   itemRenderer,
 }: ItemsContainerProps<T>) => {
@@ -153,7 +155,7 @@ export const ItemsContainer = <T,>({
   const posts =
     urlExtractors && urlExtractors?.length > 0
       ? urlExtractors
-      : pages?.flatMap((page) => extractors[0].extractor(page));
+      : pages?.flatMap((page) => extractors[0].extractor(page, baseUrl));
 
   return posts && posts?.length > 0 ? (
     cloneElement(itemsContainerComponent, {

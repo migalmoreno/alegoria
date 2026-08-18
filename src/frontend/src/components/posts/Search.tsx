@@ -9,9 +9,10 @@ import { useBreakpoint } from "~/hooks";
 
 export interface SearchPostProps<T> {
   extractors: SearchExtractor<T>[];
+  baseUrl?: string;
 }
 
-export const SearchPost = <T,>({ extractors }: SearchPostProps<T>) => {
+export const SearchPost = <T,>({ extractors, baseUrl }: SearchPostProps<T>) => {
   const { url } = useParams();
   const { data, isError, error } = useQuery<PostResponse<T>>({
     queryKey: [`/posts/${encodeURIComponent(String(url))}`],
@@ -49,6 +50,7 @@ export const SearchPost = <T,>({ extractors }: SearchPostProps<T>) => {
                   data={data}
                   url={String(url)}
                   extractor={ext as GalleryExtractor<T>}
+                  baseUrl={baseUrl}
                 />
               );
           }

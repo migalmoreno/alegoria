@@ -14,6 +14,7 @@ interface GroupBoardProps<T> {
   data?: PostResponse<T>;
   url: string;
   extractor: GroupBoardExtractor<T>;
+  baseUrl?: string;
 }
 
 export const GroupBoard = <T,>(props: GroupBoardProps<T>) => {
@@ -36,6 +37,7 @@ interface MediaBoardProps<T> {
   data?: PostResponse<T>;
   url: string;
   extractor: MediaBoardExtractor<T>;
+  baseUrl?: string;
 }
 
 export const MediaBoard = <T,>(props: MediaBoardProps<T>) => {

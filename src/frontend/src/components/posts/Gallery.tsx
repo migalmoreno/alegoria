@@ -6,6 +6,7 @@ interface GalleryProps<T> {
   data?: PostResponse<T>;
   url: string;
   extractor: GalleryExtractor<T>;
+  baseUrl?: string;
 }
 
 export const Gallery = <T,>(props: GalleryProps<T>) => {

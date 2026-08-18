@@ -45,9 +45,10 @@ interface UserInfoProps<T> {
   data: PostResponse<T>;
   url: string;
   extractor: UserInfoExtractor<T>;
+  baseUrl?: string;
 }
 
-export const UserInfo = <T,>({ url, extractor }: UserInfoProps<T>) => {
+export const UserInfo = <T,>({ url, extractor, baseUrl }: UserInfoProps<T>) => {
   const {
     data: user,
     isPending,
@@ -55,7 +56,7 @@ export const UserInfo = <T,>({ url, extractor }: UserInfoProps<T>) => {
     error,
   } = useQuery({
     queryKey: [`/posts/${encodeURIComponent(extractor.fetchUrl || url)}`],
-    select: (user: T) => extractor.extractor(user),
+    select: (user: T) => extractor.extractor(user, baseUrl),
   });
 
   if (isError) {

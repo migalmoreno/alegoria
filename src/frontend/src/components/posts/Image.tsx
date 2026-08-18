@@ -8,18 +8,20 @@ import { useEffect, useRef } from "react";
 import CustomVideoElement from "shaka-video-element";
 
 export interface ImagePostProps<T> {
-  extractor: (data: T) => Image;
+  extractor: (data: T, baseUrl?: string) => Image;
   videoExtractor?: (data: PostResponse<YtdlItem>) => Video;
+  baseUrl?: string;
 }
 
 export const ImagePost = <T,>({
   extractor,
   videoExtractor,
+  baseUrl,
 }: ImagePostProps<T>) => {
   const { url } = useParams();
   const { data, error, isFetched, isPending, isError } = useQuery({
     queryKey: [`/posts/${url}`],
-    select: (res: T) => extractor(res),
+    select: (res: T) => extractor(res, baseUrl),
   });
 
   const videoRef = useRef<CustomVideoElement>(null);

@@ -20,9 +20,10 @@ export interface URLExtractor<T> {
 
 export interface UserPostProps<T> {
   extractors: UserExtractor<T>[];
+  baseUrl?: string;
 }
 
-export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
+export const UserPost = <T,>({ extractors, baseUrl }: UserPostProps<T>) => {
   const { url } = useParams();
   const { data, isError, error } = useQuery<PostResponse<T>>({
     queryKey: [`/posts/${encodeURIComponent(String(url))}`],
@@ -94,6 +95,7 @@ export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
                   data={data}
                   url={String(url)}
                   extractor={ext}
+                  baseUrl={baseUrl}
                 />
               );
             case "media-board":
@@ -103,6 +105,7 @@ export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
                   data={data}
                   url={String(url)}
                   extractor={ext}
+                  baseUrl={baseUrl}
                 />
               );
             case "gallery":
@@ -112,6 +115,7 @@ export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
                   data={data}
                   url={String(url)}
                   extractor={ext}
+                  baseUrl={baseUrl}
                 />
               );
           }
@@ -128,11 +132,12 @@ export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
                   data={data}
                   url={ext.url}
                   extractor={ext.extractor}
+                  baseUrl={baseUrl}
                 />
               );
             case "gallery":
               return (
-                <Gallery key={i} url={ext.url} extractor={ext.extractor} />
+                <Gallery key={i} url={ext.url} extractor={ext.extractor} baseUrl={baseUrl} />
               );
           }
         })}
@@ -140,9 +145,10 @@ export const UserPost = <T,>({ extractors }: UserPostProps<T>) => {
         <ItemsContainer
           url={url}
           extractors={postExtractors}
+          baseUrl={baseUrl}
           itemsContainerComponent={<ItemsPaginationContainer />}
           itemRenderer={(post) => (
-            <DynamicImagePost extractor={postExtractors[0]} url={post.url} />
+            <DynamicImagePost extractor={postExtractors[0]} url={post.url} baseUrl={baseUrl} />
           )}
         />
       )}

@@ -167,15 +167,17 @@ export const MediaBoardPostContainer = ({
 interface UserPageStreamPostProps<T> {
   url: string;
   extractor: PostExtractor<T>;
+  baseUrl?: string;
 }
 
 export const DynamicImagePost = <T,>({
   url,
   extractor,
+  baseUrl,
 }: UserPageStreamPostProps<T>) => {
   const { data, isSuccess } = useQuery({
     queryKey: [`/posts/${encodeURIComponent(url)}`],
-    select: (data: T) => extractor.extractor(data),
+    select: (data: T) => extractor.extractor(data, baseUrl),
   });
 
   return (

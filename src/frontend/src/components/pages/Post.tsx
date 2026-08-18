@@ -35,21 +35,34 @@ export const PostPage = <T extends Post<T>>() => {
       pageSchema[category as keyof CategoryConfig]?.[
         subcategory as keyof SubCategoryProps<T>
       ];
+    const baseUrl = url
+      ? new URL(decodeURIComponent(String(url))).origin
+      : undefined;
 
     if (schemaProps) {
       switch (subcategory as keyof SubCategoryProps<T>) {
         case "search":
-          return <SearchPost {...(schemaProps as SearchPostProps<T>)} />;
+          return <SearchPost {...(schemaProps as SearchPostProps<T>)} baseUrl={baseUrl} />;
         case "user":
         case "board":
         case "created":
         case "creator":
-          return <UserPost {...(schemaProps as UserPostProps<T>)} />;
+          return (
+            <UserPost
+              {...(schemaProps as UserPostProps<T>)}
+              baseUrl={baseUrl}
+            />
+          );
         case "photo":
         case "post":
         case "image":
         case "pin": {
-          return <ImagePost {...(schemaProps as ImagePostProps<T>)} />;
+          return (
+            <ImagePost
+              {...(schemaProps as ImagePostProps<T>)}
+              baseUrl={baseUrl}
+            />
+          );
         }
       }
     }

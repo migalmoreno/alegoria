@@ -27,22 +27,22 @@ export interface BaseExtractor {
 
 export interface GalleryExtractor<T> extends BaseExtractor {
   type: "gallery";
-  extractor: (data: T) => ImagePost[];
+  extractor: (data: T, baseUrl?: string) => ImagePost[];
 }
 
 export interface PostExtractor<T> extends BaseExtractor {
   type: "post";
-  extractor: (data: T) => ImagePost;
+  extractor: (data: T, baseUrl?: string) => ImagePost;
 }
 
 export interface GroupBoardExtractor<T> extends BaseExtractor {
   type: "group-board";
-  extractor: (data: T) => BoardPost[];
+  extractor: (data: T, baseUrl?: string) => BoardPost[];
 }
 
 export interface MediaBoardExtractor<T> extends BaseExtractor {
   type: "media-board";
-  extractor: (data: T) => BoardPost[];
+  extractor: (data: T, baseUrl?: string) => BoardPost[];
 }
 
 export type ItemsExtractor<T> = (
