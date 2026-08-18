@@ -6,16 +6,16 @@ export const pageSchema: CategoryConfig = {
       extractors: [
         {
           type: "gallery",
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://www.pinterest.com/pin/${post.id}`,
+              url: `${baseUrl}/pin/${post.id}`,
               authorName: post.pinner.username,
               authorThumbnail: post.pinner.image_small_url,
-              authorUrl: `https://www.pinterest.com/${post.pinner.username}`,
+              authorUrl: `${baseUrl}/${post.pinner.username}`,
               groupName: post.board?.name,
               groupThumbnail: post.board?.image_cover_url,
-              groupUrl: `https://www.pinterest.com${post.board?.url}`,
+              groupUrl: `${baseUrl}${post.board?.url}`,
             })),
         },
       ],
@@ -24,11 +24,11 @@ export const pageSchema: CategoryConfig = {
       extractors: [
         {
           type: "group-board",
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post) => ({
               name: post.name,
               thumbnail: post.image_cover_url,
-              url: `https://www.pinterest.com${encodeURIComponent(post.url)}`,
+              url: `${baseUrl}${encodeURIComponent(post.url)}`,
               count: post.pin_count,
               date: new Date(post.created_at),
             })),
@@ -39,10 +39,10 @@ export const pageSchema: CategoryConfig = {
       extractors: [
         {
           type: "gallery",
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://www.pinterest.com${post.seo_url}`,
+              url: `${baseUrl}${post.seo_url}`,
             })),
         },
       ],
@@ -51,25 +51,25 @@ export const pageSchema: CategoryConfig = {
       extractors: [
         {
           type: "gallery",
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://www.pinterest.com${post.seo_url}`,
+              url: `${baseUrl}${post.seo_url}`,
             })),
         },
       ],
     },
-    pin: {
-      extractor: (data) => ({
+    e3df3be0: {
+      extractor: (data, baseUrl) => ({
         url: `${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${data.metadata[0].url}`,
         authorName: data.metadata[0].pinner.username,
         authorThumbnail: data.metadata[0].pinner.image_small_url,
-        authorUrl: `https://www.pinterest.com/${data.metadata[0].pinner.username}`,
+        authorUrl: `${baseUrl}/${data.metadata[0].pinner.username}`,
         description: data.metadata[0].description,
         date: new Date(data.metadata[0].created_at),
         groupName: data.metadata[0].board.name,
         groupThumbnail: data.metadata[0].board.image_cover_url,
-        groupUrl: `https://www.pinterest.com${data.metadata[0].board.url}`,
+        groupUrl: `${baseUrl}${data.metadata[0].board.url}`,
       }),
     },
   },
@@ -80,7 +80,7 @@ export const pageSchema: CategoryConfig = {
           type: "gallery",
           extractor: (data) => {
             return data.metadata.map((post) => ({
-              thumbnail: post.thumbnail.original,
+              thumbnail: post.thumbnail?.original,
               url: post.url,
             }));
           },
@@ -103,21 +103,21 @@ export const pageSchema: CategoryConfig = {
         {
           type: "gallery",
           urlMatcher: /photos/,
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post) => ({
               thumbnail: post.url,
-              url: `https://www.facebook.com/photo/?fbid=${post.id}&set=${post.set_id}`,
+              url: `${baseUrl}/photo/?fbid=${post.id}&set=${post.set_id}`,
             })),
         },
       ],
     },
-    photo: {
-      extractor: (data) => ({
+    dc1d7def: {
+      extractor: (data, baseUrl) => ({
         url: data.metadata[0].url,
         description: data.metadata[0].caption,
         date: new Date(data.metadata[0].date),
         authorName: data.metadata[0].username,
-        authorUrl: `https://www.facebook.com/${data.metadata[0].user_id}`,
+        authorUrl: `${baseUrl}/${data.metadata[0].user_id}`,
       }),
     },
   },
@@ -135,16 +135,16 @@ export const pageSchema: CategoryConfig = {
         {
           type: "gallery",
           urlMatcher: /gallery/,
-          extractor: (data) =>
+          extractor: (data, baseUrl) =>
             data.metadata.map((post, i) => ({
               thumbnail: data.urls[i],
-              url: `https://vsco.co/${post.user}/${post.video ? "video" : "media"}/${post.id}`,
+              url: `${baseUrl}/${post.user}/${post.video ? "video" : "media"}/${post.id}`,
             })),
         },
       ],
     },
-    image: {
-      extractor: (data) => ({
+    "77240af5": {
+      extractor: (data, baseUrl) => ({
         url: data.urls[0],
         authorName: data.post[0].user,
         filename: data.metadata[0].filename,
@@ -153,7 +153,7 @@ export const pageSchema: CategoryConfig = {
         meta: {
           device: `${data.metadata[0].meta.make} ${data.metadata[0].meta.model}`,
         },
-        authorUrl: `https://vsco.co/${data.post[0].user}`,
+        authorUrl: `${baseUrl}/${data.post[0].user}`,
       }),
     },
   },

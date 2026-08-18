@@ -33,7 +33,7 @@ export interface User extends Info {
 
 export interface UserInfoExtractor<T> extends BaseExtractor {
   type: "info";
-  extractor: (data: T) => Info;
+  extractor: (data: T, baseUrl?: string) => Info;
 }
 
 export type UserExtractor<T> =
