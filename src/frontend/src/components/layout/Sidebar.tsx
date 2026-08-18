@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import type { Category, CategoryConfig } from "~/types";
+import type { Category } from "~/types";
 import { HomeIcon } from "lucide-react";
 import { Link } from "wouter";
 import { SharedNavbarSubMenu } from "./Navbar";
@@ -8,6 +8,7 @@ import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { pageSchema } from "~/page-schema";
+import { hash } from "~/utils";
 import { abbreviatedSha } from "~build/git";
 
 interface MenuLinkProps {
@@ -61,15 +62,16 @@ export const Sidebar = () => {
           },
           ...categories
             .filter((category: Category) =>
-              Object.keys(pageSchema).includes(category.name),
+              Object.keys(pageSchema).includes(hash(category.name)),
             )
             .map((category: Category) => ({
               ...category,
-              subcategories: category.subcategories.filter((subcategory) =>
-                Object.keys(
-                  pageSchema[category.name as keyof CategoryConfig],
-                ).includes(subcategory.name),
-              ),
+              subcategories: category.subcategories
+                .filter((subcategory) =>
+                  Object.keys(pageSchema[hash(category.name)]).includes(
+                    hash(category.name + subcategory.name),
+                  ),
+                )
             })),
         ];
         dispatch({

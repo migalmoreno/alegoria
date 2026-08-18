@@ -1,5 +1,6 @@
 import { Link, useParams } from "wouter";
 import { CategoryConfig, Extractor, Post, SubCategoryProps } from "~/types";
+import { hash } from "~/utils";
 import { pageSchema } from "~/page-schema";
 import { UserPost, ImagePost, SearchPost, SearchPostProps } from "../posts";
 import { useQuery } from "@tanstack/react-query";
@@ -32,9 +33,7 @@ export const PostPage = <T extends Post<T>>() => {
   if (extractor?.category && extractor.subcategory) {
     const { category, subcategory } = extractor;
     const schemaProps =
-      pageSchema[category as keyof CategoryConfig]?.[
-        subcategory as keyof SubCategoryProps<T>
-      ];
+      (pageSchema as CategoryConfig)[hash(category)]?.[hash(category + subcategory)];
     const baseUrl = url
       ? new URL(decodeURIComponent(String(url))).origin
       : undefined;

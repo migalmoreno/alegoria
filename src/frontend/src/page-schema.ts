@@ -1,8 +1,7 @@
-import { CategoryConfig } from "./types";
-
-export const pageSchema: CategoryConfig = {
-  pinterest: {
-    search: {
+// @ts-nocheck
+export const pageSchema = {
+  c0d3c7b1: {
+    "1776446d": {
       extractors: [
         {
           type: "gallery",
@@ -20,7 +19,7 @@ export const pageSchema: CategoryConfig = {
         },
       ],
     },
-    user: {
+    "1692405e": {
       extractors: [
         {
           type: "group-board",
@@ -35,7 +34,7 @@ export const pageSchema: CategoryConfig = {
         },
       ],
     },
-    created: {
+    "22c9473f": {
       extractors: [
         {
           type: "gallery",
@@ -47,7 +46,7 @@ export const pageSchema: CategoryConfig = {
         },
       ],
     },
-    board: {
+    "2b9db8bf": {
       extractors: [
         {
           type: "gallery",
@@ -73,8 +72,8 @@ export const pageSchema: CategoryConfig = {
       }),
     },
   },
-  patreon: {
-    creator: {
+  "27b9c082": {
+    "67b6f7ae": {
       extractors: [
         {
           type: "gallery",
@@ -87,7 +86,7 @@ export const pageSchema: CategoryConfig = {
         },
       ],
     },
-    post: {
+    "4b1b2ee4": {
       extractor: (data) => ({
         url: data.metadata[0].thumbnail.original,
         description: data.metadata[0].content,
@@ -97,8 +96,8 @@ export const pageSchema: CategoryConfig = {
       }),
     },
   },
-  facebook: {
-    user: {
+  "5c6e7131": {
+    "9d8e01de": {
       extractors: [
         {
           type: "gallery",
@@ -121,8 +120,8 @@ export const pageSchema: CategoryConfig = {
       }),
     },
   },
-  vsco: {
-    user: {
+  f3a30c28: {
+    "3418ee8b": {
       extractors: [
         {
           type: "info",
@@ -157,8 +156,8 @@ export const pageSchema: CategoryConfig = {
       }),
     },
   },
-  instagram: {
-    user: {
+  e88db17b: {
+    a3848f58: {
       extractors: [
         {
           type: "info",
@@ -192,8 +191,8 @@ export const pageSchema: CategoryConfig = {
       ],
     },
   },
-  tiktok: {
-    user: {
+  b8d92073: {
+    f374b090: {
       extractors: [
         {
           type: "info",
@@ -232,7 +231,6 @@ export const pageSchema: CategoryConfig = {
         },
       ],
     },
-    post: {
       extractor: (data) => ({
         url: data.post[0].video.cover,
         filename: data.metadata[0].filename,
@@ -245,6 +243,7 @@ export const pageSchema: CategoryConfig = {
         videoUrl: data.urls[0],
       }),
       videoExtractor: (data) => {
+    "33295e95": {
         const headers = {
           Accept: data.post[0].http_headers["Accept"],
           Referer: data.post[0].http_headers["Referer"],
