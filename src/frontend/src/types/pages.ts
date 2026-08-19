@@ -44,4 +44,5 @@ export interface SubCategoryProps<T extends Post<T>> {
   mostliked?: UserPostProps<T["mostliked"]>;
 }
 
-export type CategoryConfig = Record<string, Record<string, unknown>>;
+export type SubCategorySchema = { searchable?: boolean; [key: string]: unknown };
+export type CategoryConfig = Record<string, Record<string, SubCategorySchema>>;

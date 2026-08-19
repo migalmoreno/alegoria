@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import type { Category } from "~/types";
+import type { Category, CategoryConfig } from "~/types";
 import { HomeIcon } from "lucide-react";
 import { Link } from "wouter";
 import { SharedNavbarSubMenu } from "./Navbar";
@@ -68,14 +68,14 @@ export const Sidebar = () => {
               ...category,
               subcategories: category.subcategories
                 .filter((subcategory) =>
-                  Object.keys(pageSchema[hash(category.name)]).includes(
-                    hash(category.name + subcategory.name),
-                  ),
+                  Object.keys(
+                    (pageSchema as CategoryConfig)[hash(category.name)] ?? {},
+                  ).includes(hash(category.name + subcategory.name)),
                 )
                 .map((subcategory) => ({
                   ...subcategory,
                   searchable:
-                    pageSchema[hash(category.name)]?.[
+                    (pageSchema as CategoryConfig)[hash(category.name)]?.[
                       hash(category.name + subcategory.name)
                     ]?.searchable !== false,
                 })),
