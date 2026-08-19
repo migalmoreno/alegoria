@@ -8,4 +8,6 @@ export interface PostResponse<T, U = T, V = T> {
   metadata: (PostMetadata<V> & T)[];
   post: U[];
   urls: string[];
+  cookies?: Record<string, string>;
+  http_headers?: Record<string, string>;
 }

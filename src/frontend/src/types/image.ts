@@ -16,6 +16,7 @@ export interface Image {
   authorName?: string;
   authorUrl?: string;
   videoUrl?: string;
+  posterUrl?: string;
   type?: string;
   groupName?: string;
   groupUrl?: string;

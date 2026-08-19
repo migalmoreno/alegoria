@@ -196,63 +196,45 @@ export const pageSchema = {
       extractors: [
         {
           type: "info",
-          urlMatcher: /video/,
-          unique: true,
-          extractor: (data) => {
-            const post = data.post[0];
-            return {
-              name: post.author.uniqueId,
-              bio: post.author.signature,
-              thumbnail: post.author.avatarLarger,
-              verified: post.author.verified,
-              nickname: post.author.nickname,
-              bioLink: post.author.bioLink?.link,
-              stats: {
-                followers: post.authorStats.followerCount,
-                following: post.authorStats.followingCount,
-                mediaCount: post.authorStats.videoCount,
-                likeCount: post.authorStats.heartCount,
-              },
-            };
-          },
+          urlMatcher: /avatar/,
+          extractor: (data) => ({
+            thumbnail: data.urls[0],
+            name: data.post[0]?.nickname,
+            bio: data.post[0]?.signature,
+            verified: data.post[0]?.verified,
+          }),
         },
         {
-          type: "post",
-          urlMatcher: /video/,
-          extractor: (data) => {
-            const post = data.post[0];
-            return {
+          type: "gallery",
+          urlMatcher: /posts/,
+          extractor: (data, baseUrl) =>
+            data.post.map((post, i) => ({
               thumbnail: post.video.cover,
-              url: `https://tiktok.com/@${post.user}/${data.metadata[0].type === "video" ? "video" : "photo"}/${post.id}`,
-              type: data.metadata[0].type,
-              videoUrl: post.video.playAddr,
-            };
-          },
+              url: `${baseUrl}/@${post.user}/${data.metadata[i]?.type === "video" ? "video" : "photo"}/${post.id}`,
+            })),
         },
       ],
     },
-      extractor: (data) => ({
-        url: data.post[0].video.cover,
-        filename: data.metadata[0].filename,
-        date: new Date(data.post[0].date),
-        description: data.post[0].desc,
-        type: data.metadata[0].type,
-        authorName: data.post[0].user,
-        authorUrl: `https://tiktok.com/@${data.post[0].user}`,
-        authorThumbnail: data.post[0].author.avatarThumb,
-        videoUrl: data.urls[0],
-      }),
-      videoExtractor: (data) => {
     "33295e95": {
+      extractor: (data, baseUrl) => {
+        const cookieStr = Object.entries(data.cookies ?? {})
+          .map(([k, v]) => `${k}=${v}`)
+          .join("; ");
         const headers = {
-          Accept: data.post[0].http_headers["Accept"],
-          Referer: data.post[0].http_headers["Referer"],
-          "User-Agent": data.post[0].http_headers["User-Agent"],
-          Cookie: encodeURIComponent(data.post[0].cookies.replace(/["]+/g, "")),
+          ...(data.http_headers ?? {}),
+          ...(cookieStr ? { Cookie: cookieStr } : {}),
         };
-
         return {
-          url: `${import.meta.env.VITE_API_URL}/api/v1/proxy?headers=${JSON.stringify(headers)}&url=${encodeURIComponent(data.post[0].url)}`,
+          url: data.post[0].video.cover,
+          posterUrl: data.post[0].video.cover,
+          filename: data.metadata[0].filename,
+          date: new Date(data.post[0].date),
+          description: data.post[0].desc,
+          type: data.metadata[0].type,
+          authorName: data.post[0].user,
+          authorUrl: `${baseUrl}/@${data.post[0].user}`,
+          authorThumbnail: data.post[0].author.avatarThumb,
+          videoUrl: `${import.meta.env.VITE_API_URL}/api/v1/proxy?headers=${encodeURIComponent(JSON.stringify(headers))}&url=${encodeURIComponent(data.urls[0])}`,
         };
       },
     },

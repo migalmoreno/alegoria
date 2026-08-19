@@ -27,7 +27,7 @@ export const ImagePost = <T,>({
   const videoRef = useRef<CustomVideoElement>(null);
 
   const { data: video } = useQuery<PostResponse<YtdlItem>>({
-    enabled: !!data?.videoUrl,
+    enabled: !!videoExtractor && !!data?.videoUrl,
     queryKey: [`/posts/${encodeURIComponent(String(data?.videoUrl))}`],
   });
 
@@ -69,7 +69,8 @@ export const ImagePost = <T,>({
                 <ShakaVideo
                   className="min-w-full max-w-full min-h-full max-h-full object-cover h-dvh"
                   ref={videoRef}
-                  poster={`${data.url}`}
+                  src={!videoExtractor && data.videoUrl ? data.videoUrl : undefined}
+                  poster={data.posterUrl}
                   controls
                 />
               ) : (

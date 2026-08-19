@@ -181,12 +181,12 @@ def get_extractors():
 
 def apply_extractor_config(category, subcategory, pagination):
     match (category, subcategory):
-        case ("tiktok", "user"):
+        case ("tiktok", "posts"):
             config.set(
                 (
                     "extractor",
                     "tiktok",
-                    "user",
+                    subcategory,
                 ),
                 "tiktok-range",
                 pagination,
