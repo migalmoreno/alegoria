@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "~/components";
 import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Category, Extractor, SubCategory } from "~/types";
 import { ReactNode, useState } from "react";
 
@@ -54,6 +54,7 @@ const SearchForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
   const [_, navigate] = useLocation();
   const [isCategorySelected, setCategorySelected] = useState<boolean>();
+  const queryClient = useQueryClient();
 
   const [categories, activeCategory, activeSubCategory, dispatch] = useAppStore(
     useShallow((state) => [
@@ -63,6 +64,19 @@ const SearchForm = () => {
       state.dispatch,
     ]),
   );
+
+  const isSearchable = activeSubCategory?.searchable !== false;
+
+  const handleNonSearchableSubcategory = async (categoryName: string, subcategory?: SubCategory) => {
+    if (subcategory?.searchable === false) {
+      const ext = await queryClient.fetchQuery<Extractor>({
+        queryKey: [`/extractors?category=${categoryName}&subcategory=${subcategory.name}`],
+        staleTime: Infinity,
+        gcTime: Infinity,
+      });
+      navigate(`/post/${encodeURIComponent(ext.url)}`);
+    }
+  };
 
   const { data: extractor } = useQuery<Extractor>({
     enabled:
@@ -96,39 +110,32 @@ const SearchForm = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <input
-            className="outline-none pr-40 w-full"
+            className="outline-none pr-40 w-full disabled:opacity-40 disabled:cursor-not-allowed"
             placeholder="Search"
-            onFocus={() => {
-              setCategorySelected(true);
-            }}
-            onInput={() => {
-              setCategorySelected(true);
-            }}
+            disabled={!isSearchable}
+            onFocus={() => setCategorySelected(true)}
+            onInput={() => setCategorySelected(true)}
             {...register("searchValue", { required: true })}
           />
-          <button type="submit" className="cursor-pointer">
+          <button type="submit" className="cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" disabled={!isSearchable}>
             <SearchIcon size={18} />
           </button>
         </form>
-        <div className="flex gap-x-1 absolute top-2.5 right-12 items-center">
+        <div className="flex gap-x-1 items-center absolute top-2.5 right-12">
           <SearchSelect
             value={activeCategory?.name}
-            onChange={(e) => {
+            onChange={async (e) => {
               setCategorySelected(true);
               const category = categories.find(
                 (category) => category.name === e.target.value,
               ) as Category;
-              dispatch({
-                type: "setActiveCategory",
-                category,
-              });
-              dispatch({
-                type: "setActiveSubCategory",
-                subcategory:
-                  category.subcategories && category.subcategories.length > 0
-                    ? category.subcategories[0]
-                    : undefined,
-              });
+              dispatch({ type: "setActiveCategory", category });
+              const subcategory =
+                category.subcategories && category.subcategories.length > 0
+                  ? category.subcategories[0]
+                  : undefined;
+              dispatch({ type: "setActiveSubCategory", subcategory });
+              await handleNonSearchableSubcategory(category.name, subcategory);
             }}
           >
             {categories.map((category, i) => (
@@ -140,13 +147,12 @@ const SearchForm = () => {
           {activeCategory && activeCategory?.subcategories?.length > 0 && (
             <SearchSelect
               value={activeSubCategory?.name}
-              onChange={(e) => {
-                dispatch({
-                  type: "setActiveSubCategory",
-                  subcategory: activeCategory?.subcategories.find(
-                    (subcategory) => subcategory.name === e.target.value,
-                  ) as SubCategory,
-                });
+              onChange={async (e) => {
+                const subcategory = activeCategory?.subcategories.find(
+                  (subcategory) => subcategory.name === e.target.value,
+                ) as SubCategory;
+                dispatch({ type: "setActiveSubCategory", subcategory });
+                await handleNonSearchableSubcategory(activeCategory?.name ?? "", subcategory);
               }}
             >
               {activeCategory.subcategories.map((subcategory, i) => (

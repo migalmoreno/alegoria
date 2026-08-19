@@ -56,7 +56,7 @@ const initialState: AppState = {
 export const useAppStore = create<AppStore>()(
   persist(redux(appReducer, initialState), {
     name: "alegoria",
-    version: 0.3,
+    version: 0.4,
     partialize: (state) => ({
       categories: state.categories,
       enabledCategories: state.enabledCategories,

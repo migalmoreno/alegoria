@@ -3,6 +3,7 @@ interface SubCategory {
   name: string;
   category: string;
   description: string;
+  searchable?: boolean;
 }
 
 interface Category {

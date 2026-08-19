@@ -72,6 +72,13 @@ export const Sidebar = () => {
                     hash(category.name + subcategory.name),
                   ),
                 )
+                .map((subcategory) => ({
+                  ...subcategory,
+                  searchable:
+                    pageSchema[hash(category.name)]?.[
+                      hash(category.name + subcategory.name)
+                    ]?.searchable !== false,
+                })),
             })),
         ];
         dispatch({
