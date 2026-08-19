@@ -45,11 +45,8 @@ export interface MediaBoardExtractor<T> extends BaseExtractor {
   extractor: (data: T, baseUrl?: string) => BoardPost[];
 }
 
-export type ItemsExtractor<T> = (
+export type ItemsExtractor<T> =
   | GalleryExtractor<T>
   | GroupBoardExtractor<T>
   | MediaBoardExtractor<T>
-  | PostExtractor<T>
-) & {
-  batch?: boolean;
-};
+  | PostExtractor<T>;
