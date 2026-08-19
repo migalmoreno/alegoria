@@ -6,11 +6,10 @@ from gallery_dl.exception import GalleryDLException, NotFoundError
 from gallery_dl.extractor import extractors, find as find_extractor
 from werkzeug.exceptions import HTTPException
 from itertools import groupby
-from gallery_dl import config
+from gallery_dl import config, job
 from yt_dlp import DownloadError
 from flask import Blueprint, request, jsonify, make_response, Response
 from urllib.parse import unquote
-from alegoria.downloader import download_post
 from http import HTTPStatus
 
 _extractors = list(extractors())
@@ -195,6 +194,35 @@ def apply_extractor_config(category, subcategory, pagination):
         case _:
             config.set(("extractor",), "image-range", pagination)
 
+
+def download_post(url):
+    extractor = find_extractor(url)
+    data_job = job.DataJob(extractor, file=None)
+    with open(os.devnull, "w") as f:
+        data_job.file = f
+        data_job.run()
+
+    if data_job.exception:
+        raise data_job.exception
+
+    if not data_job.data_meta and not data_job.data_post:
+        exc = GalleryDLException(f"No content returned for {url}")
+        exc.status = 502
+        raise exc
+
+    cookies = {}
+    http_headers = {}
+    if extractor is not None and extractor.session is not None:
+        cookies = {c.name: c.value for c in extractor.session.cookies}
+        http_headers = dict(extractor.session.headers)
+
+    return {
+        "metadata": data_job.data_meta,
+        "post": data_job.data_post,
+        "urls": data_job.data_urls,
+        "cookies": cookies,
+        "http_headers": http_headers,
+    }
 
 @api_v1.route("/posts/<path:url>")
 def posts(url=""):
