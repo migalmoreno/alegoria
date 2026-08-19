@@ -29,7 +29,6 @@ def handle_cors(response):
 
 @api_v1.errorhandler(HTTPException)
 def handle_http_exception(e):
-    """Return JSON instead of HTML for HTTP errors."""
     response = e.get_response()
     response.data = jsonify(
         {"code": e.code, "name": e.name, "description": e.description}
@@ -40,7 +39,6 @@ def handle_http_exception(e):
 
 @api_v1.errorhandler(NotFoundError)
 def handle_gallery_dl_not_found(e):
-    """Return JSON instead of HTML for HTTP errors."""
     return make_response(
         {
             "message": e.message,
@@ -52,7 +50,6 @@ def handle_gallery_dl_not_found(e):
 
 @api_v1.errorhandler(GalleryDLException)
 def handle_gallery_dl_exception(e):
-    """Return JSON instead of HTML for HTTP errors."""
     status = e.status if hasattr(e, "status") else 500
     return make_response(
         {
