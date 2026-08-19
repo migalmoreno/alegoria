@@ -227,10 +227,8 @@ def download_post(url):
 @api_v1.route("/posts/<path:url>")
 def posts(url=""):
     items_per_page = request.args.get("limit", default=10, type=int)
-    pagination_start = request.args.get("skip", default=1, type=int)
-    pagination_end = (
-        pagination_start + items_per_page - (0 if pagination_start == 1 else 1)
-    )
+    pagination_start = request.args.get("skip", default=0, type=int) + 1
+    pagination_end = pagination_start + items_per_page - 1
     parsed_url = unquote(url)
     extractor = find_extractor(parsed_url)
 
