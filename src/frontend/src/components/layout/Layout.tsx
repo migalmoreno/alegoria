@@ -57,7 +57,11 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <LoadingBarContainer>
-      <Toaster visibleToasts={1} theme="dark" />
+      <Toaster
+        visibleToasts={1}
+        theme="dark"
+        toastOptions={{ classNames: { error: "!bg-red-900" } }}
+      />
       <div className="flex flex-col h-full overflow-x-clip">
         <Navbar />
         <div className="flex flex-auto bg-black">

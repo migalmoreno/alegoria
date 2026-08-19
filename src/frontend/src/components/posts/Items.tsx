@@ -148,7 +148,6 @@ export const ItemsContainer = <T,>({
   if (isError) {
     toast.error(error.message, {
       description: error.cause ? String(error.cause) : undefined,
-      className: "!bg-red-900",
     });
   }
   const pages = data?.pages.flatMap((page) => page);
