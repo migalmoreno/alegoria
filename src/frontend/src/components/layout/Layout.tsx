@@ -3,14 +3,19 @@ import { Navbar } from "./Navbar";
 import { MobileMenu, Sidebar } from "./Sidebar";
 import { useEffect } from "react";
 import { LoadingBarContainer } from "react-top-loading-bar";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { data, isSuccess } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isError: configFetchError,
+    error: configFetchErrorMsg,
+  } = useQuery({
     queryKey: ["/config.json"],
     queryFn: async () => {
       const res = await fetch("/config.json");
@@ -31,7 +36,18 @@ export const Layout = ({ children }: LayoutProps) => {
         body: JSON.stringify(settings),
       });
     },
+    onError: (error) => {
+      toast.error("Failed to load config", { description: error.message });
+    },
   });
+
+  useEffect(() => {
+    if (configFetchError) {
+      toast.error("Failed to load config", {
+        description: configFetchErrorMsg?.message,
+      });
+    }
+  }, [configFetchError]);
 
   useEffect(() => {
     if (isSuccess && data) {
