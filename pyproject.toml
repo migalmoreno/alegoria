@@ -1,7 +1,7 @@
 [project]
 name = "alegoria"
 version = "0.1.0"
-description = "Web front-end to image galleries and collections from several hosting sites"
+description = "Web aggregator for image galleries and collections from several hosting sites"
 requires-python = ">=3.13"
 dependencies = [
     "flask>=3.1.2",

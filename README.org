@@ -1,7 +1,7 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil; -*-
 #+OPTIONS: toc:nil num:nil
 #+title: alegoria
-Alegoria is a web front-end to image galleries and collections from several hosting sites. To add support for the rest of [[https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md][supported sites]], follow the extraction logic in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
+Alegoria is a web aggregator for image galleries and collections from several hosting sites.
 
 * Installation
 There's a Docker Compose file available which you can run locally like this:
@@ -27,3 +27,12 @@ Then start the front-end and back-end processes with this:
 # Add `-- -D` if you want to detach the processes
 nix run .
 #+end_src
+
+** Adding a new extractor
+To add support for a new gallery-dl extractor, first inspect the API response shape by running the backend and hitting the posts endpoint:
+
+#+begin_src sh
+curl -s "http://localhost:5000/api/v1/posts/<url>" | jq .
+#+end_src
+
+Use the response to write the extractor mapping in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
