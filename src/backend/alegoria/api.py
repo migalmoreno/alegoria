@@ -7,7 +7,6 @@ from gallery_dl.extractor import extractors, find as find_extractor
 from werkzeug.exceptions import HTTPException
 from itertools import groupby
 from gallery_dl import config, job
-from yt_dlp import DownloadError
 from flask import Blueprint, request, jsonify, make_response, Response
 from urllib.parse import unquote
 from http import HTTPStatus
@@ -57,11 +56,6 @@ def handle_gallery_dl_exception(e):
         },
         status,
     )
-
-
-@api_v1.errorhandler(DownloadError)
-def handle_yt_dlp_download_error(e):
-    return make_response({"message": e.msg, "status": 500}, 500)
 
 
 @api_v1.route("/health")
