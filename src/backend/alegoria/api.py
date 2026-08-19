@@ -92,6 +92,8 @@ def proxy():
     if headers_arg := request.args.get("headers"):
         extra_headers = json.loads(headers_arg)
 
+    allow_redirects = request.args.get("follow_redirects", "true").lower() != "false"
+
     res = requests.request(
         method=request.method,
         url=url,
@@ -99,7 +101,7 @@ def proxy():
         | extra_headers,
         data=request.get_data(),
         cookies=request.cookies,
-        allow_redirects=False,
+        allow_redirects=allow_redirects,
     )
     headers = [(k, v) for k, v in res.raw.headers.items()]
     response = Response(res.content, res.status_code, headers)
