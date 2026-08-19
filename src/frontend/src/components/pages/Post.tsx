@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLoadingBar } from "react-top-loading-bar";
 import { UserPostProps } from "../posts/User";
 import { ImagePostProps } from "../posts/Image";
+import { useEffect, useRef } from "react";
 
 export const PostPage = <T extends Post<T>>() => {
   const { url } = useParams();
@@ -16,19 +17,25 @@ export const PostPage = <T extends Post<T>>() => {
     isFetched,
   } = useQuery<Extractor>({
     queryKey: [`/extractors?url=${encodeURIComponent(String(url))}`],
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
   const { start, complete } = useLoadingBar({
     color: "var(--color-indigo-400)",
     height: 2,
   });
 
-  if (isPending) {
-    start();
-  }
+  const barStarted = useRef(false);
 
-  if (isFetched) {
-    complete();
-  }
+  useEffect(() => {
+    if (isPending) {
+      start();
+      barStarted.current = true;
+    } else if (isFetched && barStarted.current) {
+      complete();
+      barStarted.current = false;
+    }
+  }, [isPending, isFetched]);
 
   if (extractor?.category && extractor.subcategory) {
     const { category, subcategory } = extractor;

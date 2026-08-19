@@ -87,6 +87,8 @@ const SearchForm = () => {
     queryKey: [
       `/extractors?category=${activeCategory?.name}&subcategory=${activeSubCategory?.name}`,
     ],
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
