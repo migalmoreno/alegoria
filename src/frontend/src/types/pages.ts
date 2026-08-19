@@ -13,6 +13,8 @@ export type Post<
     pin?: T["pin"];
     created?: T["created"];
     search?: T["search"];
+    trending?: T["trending"];
+    mostliked?: T["mostliked"];
   },
 > = {
   user?: T["user"];
@@ -24,6 +26,8 @@ export type Post<
   pin?: T["pin"];
   created?: T["created"];
   search?: T["search"];
+  trending?: T["trending"];
+  mostliked?: T["mostliked"];
 };
 
 export interface SubCategoryProps<T extends Post<T>> {
@@ -36,6 +40,8 @@ export interface SubCategoryProps<T extends Post<T>> {
   pin?: ImagePostProps<T["pin"]>;
   created?: UserPostProps<T["board"]>;
   search?: SearchPostProps<T["search"]>;
+  trending?: UserPostProps<T["trending"]>;
+  mostliked?: UserPostProps<T["mostliked"]>;
 }
 
 export type CategoryConfig = Record<string, Record<string, unknown>>;

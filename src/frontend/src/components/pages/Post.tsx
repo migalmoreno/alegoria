@@ -46,6 +46,8 @@ export const PostPage = <T extends Post<T>>() => {
         case "board":
         case "created":
         case "creator":
+        case "trending":
+        case "mostliked":
           return (
             <UserPost
               {...(schemaProps as UserPostProps<T>)}
