@@ -1,4 +1,5 @@
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
+import { toast } from "sonner";
 import type { Category, CategoryConfig } from "~/types";
 import { HomeIcon } from "lucide-react";
 import { Link } from "wouter";
@@ -49,46 +50,49 @@ export const Sidebar = () => {
     useShallow((state) => [state.categories, state.dispatch]),
   );
 
-  useQuery({
+  const {
+    data: fetchedCategories,
+    isError,
+    error,
+  } = useQuery<Category[]>({
     enabled: categories.length === 0,
     queryKey: ["/categories"],
-    select: (categories: Category[]) => {
-      if (categories) {
-        dispatch({ type: "setCategories", categories });
-        const enabledCategories = [
-          {
-            name: "url",
-            subcategories: [],
-          },
-          ...categories
-            .filter((category: Category) =>
-              Object.keys(pageSchema).includes(hash(category.name)),
-            )
-            .map((category: Category) => ({
-              ...category,
-              subcategories: category.subcategories
-                .filter((subcategory) =>
-                  Object.keys(
-                    (pageSchema as CategoryConfig)[hash(category.name)] ?? {},
-                  ).includes(hash(category.name + subcategory.name)),
-                )
-                .map((subcategory) => ({
-                  ...subcategory,
-                  searchable:
-                    (pageSchema as CategoryConfig)[hash(category.name)]?.[
-                      hash(category.name + subcategory.name)
-                    ]?.searchable !== false,
-                })),
-            })),
-        ];
-        dispatch({
-          type: "setEnabledCategories",
-          categories: enabledCategories,
-        });
-      }
-      return categories;
-    },
   });
+
+  useEffect(() => {
+    if (!isError) return;
+    dispatch({ type: "setCategoriesError", error: true });
+    toast.error("Failed to load extractors", { description: error?.message });
+  }, [isError]);
+
+  useEffect(() => {
+    if (!fetchedCategories) return;
+    dispatch({ type: "setCategories", categories: fetchedCategories });
+    const enabledCategories = [
+      { name: "url", subcategories: [] },
+      ...fetchedCategories
+        .filter((category: Category) =>
+          Object.keys(pageSchema).includes(hash(category.name)),
+        )
+        .map((category: Category) => ({
+          ...category,
+          subcategories: category.subcategories
+            .filter((subcategory) =>
+              Object.keys(
+                (pageSchema as CategoryConfig)[hash(category.name)] ?? {},
+              ).includes(hash(category.name + subcategory.name)),
+            )
+            .map((subcategory) => ({
+              ...subcategory,
+              searchable:
+                (pageSchema as CategoryConfig)[hash(category.name)]?.[
+                  hash(category.name + subcategory.name)
+                ]?.searchable !== false,
+            })),
+        })),
+    ];
+    dispatch({ type: "setEnabledCategories", categories: enabledCategories });
+  }, [fetchedCategories]);
 
   return (
     <div className="sticky top-[60px] h-[calc(100dvh-60px)] overflow-auto bg-black text-white hidden lg:flex shrink-0">

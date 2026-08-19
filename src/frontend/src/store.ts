@@ -5,6 +5,7 @@ import { persist, redux } from "zustand/middleware";
 interface AppState {
   categories: Category[];
   enabledCategories: Category[];
+  categoriesError: boolean;
   showMobileMenu: boolean;
   showSearchForm: boolean;
   activeCategory?: Category;
@@ -19,6 +20,7 @@ type AppStore = AppState & {
 type AppAction =
   | { type: "setCategories"; categories: Category[] }
   | { type: "setEnabledCategories"; categories: Category[] }
+  | { type: "setCategoriesError"; error: boolean }
   | { type: "setActiveCategory"; category: Category }
   | { type: "setActiveSubCategory"; subcategory?: SubCategory }
   | { type: "setActiveExtractor"; extractor: Extractor }
@@ -31,6 +33,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, categories: action.categories };
     case "setEnabledCategories":
       return { ...state, enabledCategories: action.categories };
+    case "setCategoriesError":
+      return { ...state, categoriesError: action.error };
     case "setActiveCategory":
       return { ...state, activeCategory: action.category };
     case "setActiveSubCategory":
@@ -49,6 +53,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
 const initialState: AppState = {
   categories: [],
   enabledCategories: [],
+  categoriesError: false,
   showMobileMenu: false,
   showSearchForm: false,
 };
