@@ -29,4 +29,3 @@ gallery-dl
 *.njsproj
 *.sln
 *.sw?
-.dir-locals.el
