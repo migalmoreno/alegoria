@@ -239,4 +239,68 @@ export const pageSchema = {
       },
     },
   },
+  ce200ea0: {
+    "404ea5a3": {
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data, baseUrl) =>
+            data.metadata.map((post) => ({
+              thumbnail: new URL(post.thumbnail_path, new URL(post.url).origin)
+                .href,
+              url: `${baseUrl}/${post.creator}/${post.id}`,
+              authorName: post.creator,
+              authorUrl: `${baseUrl}/${post.creator}`,
+            })),
+        },
+      ],
+    },
+    "5262c92a": {
+      extractor: (data, baseUrl) => ({
+        url: data.post[0]?.url,
+        videoUrl: data.post[0]?.url,
+        authorName: data.post[0]?.creator,
+        type: ["mp4", "mov"].includes(data.metadata[0]?.extension)
+          ? "video"
+          : "image",
+        filename: data.post[0]?.filename,
+        description: data.metadata[0]?.description,
+        authorUrl: `${baseUrl}/${data.post[0]?.creator}`,
+      }),
+    },
+    "36c7e141": {
+      searchable: false,
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data, baseUrl) =>
+            data.metadata.map((post) => ({
+              thumbnail: new URL(post.thumbnail_path, new URL(post.url).origin)
+                .href,
+              url: `${baseUrl}/${post.creator}/${post.id}`,
+              authorName: post.creator,
+              authorThumbnail: post?.profile?.profile_pic,
+              authorUrl: `${baseUrl}/${post.creator}`,
+            })),
+        },
+      ],
+    },
+    "1601e678": {
+      searchable: false,
+      extractors: [
+        {
+          type: "gallery",
+          extractor: (data, baseUrl) =>
+            data.metadata.map((post) => ({
+              thumbnail: new URL(post.thumbnail_path, new URL(post.url).origin)
+                .href,
+              url: `${baseUrl}/${post.creator}/${post.id}`,
+              authorName: post.creator,
+              authorThumbnail: post?.profile?.profile_pic,
+              authorUrl: `${baseUrl}/${post.creator}`,
+            })),
+        },
+      ],
+    },
+  },
 };
