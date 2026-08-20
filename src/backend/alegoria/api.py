@@ -201,6 +201,10 @@ def download_post(url):
     if data_job.exception:
         raise data_job.exception
 
+    error_entry = next((d[1] for d in data_job.data if d[0] == -1), None)
+    if error_entry:
+        raise GalleryDLException(error_entry["message"])
+
     if not data_job.data_meta and not data_job.data_post:
         exc = GalleryDLException(f"No content returned for {url}")
         exc.status = 502
