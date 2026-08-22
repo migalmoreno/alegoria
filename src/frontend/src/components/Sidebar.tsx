@@ -66,10 +66,7 @@ export const Sidebar = () => {
       { name: "url", subcategories: [] },
       ...fetchedCategories.map((category: Category) => ({
         ...category,
-        subcategories: category.subcategories.map((subcategory) => ({
-          ...subcategory,
-          searchable: true,
-        })),
+        subcategories: category.subcategories,
       })),
     ];
     dispatch({ type: "setEnabledCategories", categories: enabledCategories });

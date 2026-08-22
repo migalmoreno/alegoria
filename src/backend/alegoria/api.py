@@ -112,13 +112,15 @@ def get_grouped_extractors():
     for k, g in groupby(_extractors, key=lambda ext: ext.basecategory or ext.category):
         exts = []
         for ext in g:
-            if normalize(ext.category, ext.subcategory, {}, "") is None:
+            normalized = normalize(ext.category, ext.subcategory, {}, "")
+            if normalized is None:
                 continue
             exts.append(
                 {
                     "name": ext.subcategory,
                     "category": ext.basecategory or ext.category,
                     "example": ext.example,
+                    "searchable": normalized.get("searchable", True),
                 }
             )
         if exts:
@@ -393,9 +395,10 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "groupThumbnail": post["board"]["image_cover_url"],
                 "groupUrl": f"{base_url}{post['board']['url']}",
             }
-        case ("ce200ea0", "404ea5a3"):
+        case ("ce200ea0", "404ea5a3") | ("ce200ea0", "36c7e141") | ("ce200ea0", "1601e678"):
             return {
                 "renderer": "gallery",
+                "searchable": False,
                 "items": [
                     {
                         "thumbnail": urljoin(
@@ -404,7 +407,8 @@ def normalize(category, subcategory, data, base_url, url=""):
                         ),
                         "url": f"{base_url}/{post['creator']}/{post['id']}",
                         "authorName": post.get("creator"),
-                        "authorUrl": f"{base_url}/{post['creator']}",
+                        "authorThumbnail": (post.get("profile") or {}).get("profile_pic"),
+                        "authorUrl": f"{base_url}/{post.get('creator')}",
                     }
                     for post in meta
                 ],
@@ -424,25 +428,6 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "description": m.get("description"),
                 "authorName": p.get("creator"),
                 "authorUrl": f"{base_url}/{p.get('creator')}",
-            }
-        case ("ce200ea0", "36c7e141") | ("ce200ea0", "1601e678"):
-            return {
-                "renderer": "gallery",
-                "items": [
-                    {
-                        "thumbnail": urljoin(
-                            f"{(p := urlparse(post['url'])).scheme}://{p.netloc}/",
-                            post["thumbnail_path"],
-                        ),
-                        "url": f"{base_url}/{post['creator']}/{post['id']}",
-                        "authorName": post.get("creator"),
-                        "authorThumbnail": (post.get("profile") or {}).get(
-                            "profile_pic"
-                        ),
-                        "authorUrl": f"{base_url}/{post.get('creator')}",
-                    }
-                    for post in meta
-                ],
             }
         case ("b8d92073", "f374b090"):
             urls = data.get("urls", [])
