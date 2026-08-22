@@ -102,9 +102,11 @@ def proxy():
         cookies=request.cookies,
         allow_redirects=allow_redirects,
     )
-    headers = [(k, v) for k, v in res.raw.headers.items()]
-    response = Response(res.content, res.status_code, headers)
-    return response
+    content = res.content
+    excluded = {"transfer-encoding", "content-encoding", "content-length"}
+    headers = [(k, v) for k, v in res.raw.headers.items() if k.lower() not in excluded]
+    headers.append(("Content-Length", str(len(content))))
+    return Response(content, res.status_code, headers)
 
 
 def get_grouped_extractors():
