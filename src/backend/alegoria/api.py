@@ -107,6 +107,8 @@ def get_grouped_extractors():
     for k, g in groupby(_extractors, key=lambda ext: ext.basecategory or ext.category):
         exts = []
         for ext in g:
+            if normalize(ext.category, ext.subcategory, {}, "") is None:
+                continue
             exts.append(
                 {
                     "name": ext.subcategory,
@@ -114,8 +116,8 @@ def get_grouped_extractors():
                     "example": ext.example,
                 }
             )
-
-        groups.append({"name": k, "subcategories": list(exts)})
+        if exts:
+            groups.append({"name": k, "subcategories": exts})
 
     return groups
 
@@ -514,7 +516,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "authorUrl": f"{base_url}/@{p.get('user')}",
                 "authorThumbnail": (p.get("author") or {}).get("avatarThumb"),
             }
-    return {}
+    return None
 
 
 def download_post(url):
@@ -572,7 +574,7 @@ def posts(url=""):
         category, subcategory = extractor._cfgpath[1], extractor._cfgpath[2]
         base_url = f"{urlparse(parsed_url).scheme}://{urlparse(parsed_url).netloc}"
         normalized = normalize(category, subcategory, post, base_url, parsed_url)
-        if normalized:
+        if normalized is not None:
             return make_response(normalized)
 
     return make_response(post)

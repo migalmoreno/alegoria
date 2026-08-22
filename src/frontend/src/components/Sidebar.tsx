@@ -44,16 +44,13 @@ const Menu = () => {
 };
 
 export const Sidebar = () => {
-  const [categories, dispatch] = useAppStore(
-    useShallow((state) => [state.categories, state.dispatch]),
-  );
+  const dispatch = useAppStore((state) => state.dispatch);
 
   const {
     data: fetchedCategories,
     isError,
     error,
   } = useQuery<Category[]>({
-    enabled: categories.length === 0,
     queryKey: ["/categories"],
   });
 

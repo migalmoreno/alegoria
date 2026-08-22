@@ -63,8 +63,6 @@ export const useAppStore = create<AppStore>()(
     name: "alegoria",
     version: 0.4,
     partialize: (state) => ({
-      categories: state.categories,
-      enabledCategories: state.enabledCategories,
       activeCategory: state.activeCategory,
       activeSubCategory: state.activeSubCategory,
     }),
