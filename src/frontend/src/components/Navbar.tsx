@@ -108,8 +108,8 @@ const SearchForm = () => {
     if (extractor) {
       const searchUrl = extractor.url;
       const interpolatedUrl = searchUrl.replace(
-        extractor.groups[0],
-        formData.searchValue,
+        new RegExp(`/${extractor.groups[0]}(/|$)`),
+        `/${formData.searchValue}$1`,
       );
       navigate(`/post/${encodeURIComponent(interpolatedUrl)}`);
     } else {
