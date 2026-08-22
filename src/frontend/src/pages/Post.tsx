@@ -11,7 +11,7 @@ import {
   UserProfileResponse,
   PageResponse,
 } from "~/types";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLoadingBar } from "react-top-loading-bar";
 import { CheckCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -20,81 +20,33 @@ import {
   GroupBoardItemContainer,
   ImagePostContainer,
   MediaBoardItemContainer,
-  ItemsPaginationContainer,
+  ItemsContainer,
 } from "~/components";
-import { useFetchOnScroll } from "~/hooks";
-import { ErrorContainer, LoadingContainer, UserAvatar } from "~/components";
+import { ErrorContainer, UserAvatar } from "~/components";
 import { formatTimeAgo } from "~/utils";
 
-const ITEMS_PER_PAGE = 10;
-
-const Gallery = ({
-  url,
-  initialData,
-}: {
-  url: string;
-  initialData?: GalleryResponse;
-}) => {
-  const {
-    data,
-    error,
-    isPending,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: [`/posts/${url}/normalized`],
-    queryFn: async ({ pageParam }) => {
-      if (pageParam === 0 && initialData) return initialData;
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/posts/${encodeURIComponent(url)}?limit=${ITEMS_PER_PAGE}&skip=${pageParam * ITEMS_PER_PAGE}`,
-      );
-      const json = await res.json();
-      if (!res.ok)
-        throw new Error(`${res.status}: ${res.statusText}`, {
-          cause: json.message,
-        });
-      return json as GalleryResponse;
-    },
-    staleTime: Infinity,
-    gcTime: Infinity,
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _, lastPageParam) =>
-      lastPage.items.length > 0 ? lastPageParam + 1 : undefined,
-  });
-
-  const { ref } = useFetchOnScroll<HTMLDivElement>(
-    fetchNextPage,
-    hasNextPage && !isFetchingNextPage,
-  );
-  const items = data?.pages.flatMap((page) => page.items ?? []);
-
-  if (isPending) return <LoadingContainer />;
-  if (error) return <ErrorContainer error={error as Error} />;
-
-  return (
-    <ItemsPaginationContainer hasNextPage={hasNextPage} ref={ref}>
-      {items?.map((item, i) => (
-        <ImagePostContainer key={i} post={item as GalleryItem} />
-      ))}
-    </ItemsPaginationContainer>
-  );
-};
-
-const GroupBoard = ({ items }: { items: BoardItem[] }) => (
-  <ItemsPaginationContainer>
-    {items.map((item, i) => (
-      <GroupBoardItemContainer key={i} post={item} />
-    ))}
-  </ItemsPaginationContainer>
+const Gallery = ({ url, initialData }: { url: string; initialData?: GalleryResponse }) => (
+  <ItemsContainer<GalleryResponse, GalleryItem>
+    url={url}
+    initialData={initialData}
+    itemRenderer={(item, i) => <ImagePostContainer key={i} post={item} />}
+  />
 );
 
-const MediaBoard = ({ items }: { items: BoardItem[] }) => (
-  <ItemsPaginationContainer>
-    {items.map((item, i) => (
-      <MediaBoardItemContainer key={i} post={item} />
-    ))}
-  </ItemsPaginationContainer>
+const GroupBoard = ({ url, initialData }: { url: string; initialData?: GroupBoardResponse }) => (
+  <ItemsContainer<GroupBoardResponse, BoardItem>
+    url={url}
+    initialData={initialData}
+    itemRenderer={(item, i) => <GroupBoardItemContainer key={i} post={item} />}
+  />
+);
+
+const MediaBoard = ({ url, initialData }: { url: string; initialData?: MediaBoardResponse }) => (
+  <ItemsContainer<MediaBoardResponse, BoardItem>
+    url={url}
+    initialData={initialData}
+    itemRenderer={(item, i) => <MediaBoardItemContainer key={i} post={item} />}
+  />
 );
 
 const UserInfoHeader = ({ data }: { data: UserInfoData }) => (
@@ -295,9 +247,9 @@ export const PostPage = () => {
     case "image":
       return <ImageView data={page as ImageResponse} />;
     case "group-board":
-      return <GroupBoard items={(page as GroupBoardResponse).items} />;
+      return <GroupBoard url={String(url)} initialData={page as GroupBoardResponse} />;
     case "media-board":
-      return <MediaBoard items={(page as MediaBoardResponse).items} />;
+      return <MediaBoard url={String(url)} initialData={page as MediaBoardResponse} />;
     case "user-info":
       return <UserInfo data={page as UserInfoResponse} />;
     case "user-profile":
