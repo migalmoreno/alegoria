@@ -6,7 +6,6 @@ import { Link } from "wouter";
 import { SharedNavbarSubMenu } from "./Navbar";
 import { AnimatePresence, motion } from "motion/react";
 import { useAppStore } from "~/store";
-import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { abbreviatedSha } from "~build/git";
 

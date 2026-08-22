@@ -37,7 +37,12 @@ interface SearchSelectProps {
   className?: string;
 }
 
-const SearchSelect = ({ value, onChange, children, className }: SearchSelectProps) => (
+const SearchSelect = ({
+  value,
+  onChange,
+  children,
+  className,
+}: SearchSelectProps) => (
   <select
     className={`appearance-none bg-neutral-200 rounded-md px-2 flex items-center text-center text-neutral-700 text-xs h-6 font-medium cursor-pointer outline-none ${className ?? ""}`}
     value={value}
@@ -146,7 +151,10 @@ const SearchForm = () => {
                     ? category.subcategories[0]
                     : undefined;
                 dispatch({ type: "setActiveSubCategory", subcategory });
-                await handleNonSearchableSubcategory(category.name, subcategory);
+                await handleNonSearchableSubcategory(
+                  category.name,
+                  subcategory,
+                );
               }}
             >
               {categories.map((category, i) => (
@@ -164,7 +172,10 @@ const SearchForm = () => {
                     (subcategory) => subcategory.name === e.target.value,
                   ) as SubCategory;
                   dispatch({ type: "setActiveSubCategory", subcategory });
-                  await handleNonSearchableSubcategory(activeCategory?.name ?? "", subcategory);
+                  await handleNonSearchableSubcategory(
+                    activeCategory?.name ?? "",
+                    subcategory,
+                  );
                 }}
               >
                 {activeCategory.subcategories.map((subcategory, i) => (
@@ -206,7 +217,7 @@ export const Navbar = () => {
         <SharedNavbarSubMenu />
       )}
       <div
-        className={`hidden md:flex ${showSearchForm ? "!flex !md:hidden" : ""} items-center justify-center w-full md:absolute z-0`}
+        className={`hidden md:flex ${showSearchForm ? "!flex !md:hidden" : ""} items-center justify-center flex-1 min-w-0 md:w-full md:absolute z-0`}
       >
         <SearchForm />
       </div>
