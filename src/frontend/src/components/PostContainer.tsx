@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { GalleryItem, BoardItem } from "~/types";
+import { GalleryItem, BoardItem, ThreadPost } from "~/types";
 import { formatTimeAgo } from "~/utils";
 import { Bullet } from "./Bullet";
 import { UserAvatar } from "./UserAvatar";
@@ -118,6 +118,43 @@ export const GroupBoardItemContainer = ({
   );
 };
 
+interface ThreadPostContainerProps {
+  post?: ThreadPost;
+}
+
+export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => (
+  <div id={post?.no ? `p${post.no}` : undefined} className="flex flex-col gap-y-2 border border-neutral-800 rounded-xl p-3">
+    <div className="flex items-center gap-x-2 text-xs text-neutral-400">
+      <span className="font-semibold text-neutral-200">{post?.name ?? "Anonymous"}</span>
+      {post?.no && <span>#{post.no}</span>}
+      {post?.date && (
+        <span title={new Date(post.date).toLocaleString()}>
+          {formatTimeAgo(new Date(post.date))}
+        </span>
+      )}
+    </div>
+    {post?.thumbnail && (
+      <a
+        href={`${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${encodeURIComponent(String(post.url))}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <img
+          alt=""
+          className="max-h-64 max-w-xs object-contain rounded-lg"
+          src={`${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${encodeURIComponent(post.thumbnail)}`}
+        />
+      </a>
+    )}
+    {post?.com && (
+      <div
+        className="text-sm text-neutral-200 [overflow-wrap:anywhere]"
+        dangerouslySetInnerHTML={{ __html: post.com }}
+      />
+    )}
+  </div>
+);
+
 interface MediaBoardItemContainerProps {
   post?: BoardItem;
   extraClassName?: string;
@@ -147,7 +184,10 @@ export const MediaBoardItemContainer = ({
         </Link>
       </div>
       <div className="flex flex-col gap-y-1">
-        <h1 className="font-semibold text-sm">{post?.name}</h1>
+        <h1 className="font-semibold text-sm line-clamp-2">{post?.name}</h1>
+        {post?.description && (
+          <p className="text-neutral-400 text-xs line-clamp-2">{post.description}</p>
+        )}
         <div className="flex text-neutral-400 text-xs items-center gap-x-1">
           {post?.count && post.count > 0 && <span>{post.count} items</span>}
           {post?.count && post.count > 0 && post?.date && <Bullet />}

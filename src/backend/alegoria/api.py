@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+import re
 import tempfile
 from gallery_dl.exception import GalleryDLException, NotFoundError
 from gallery_dl.extractor import extractors, find as find_extractor
@@ -10,6 +11,10 @@ from gallery_dl import config, job
 from flask import Blueprint, request, jsonify, make_response, Response
 from urllib.parse import unquote, urlparse, urljoin, quote
 from http import HTTPStatus
+from datetime import datetime
+
+from . import extractors as _extractors_patch
+from .utils import fnv1a as _fnv1a
 
 _extractors = list(extractors())
 
@@ -176,29 +181,13 @@ def get_extractors():
 
 
 def apply_extractor_config(category, subcategory, pagination):
-    match (category, subcategory):
-        case ("tiktok", "posts"):
-            config.set(
-                (
-                    "extractor",
-                    "tiktok",
-                    subcategory,
-                ),
-                "tiktok-range",
-                pagination,
-            )
-        case ("pinterest", "user"):
+    match (_fnv1a(category), _fnv1a(category + subcategory)):
+        case ("b8d92073", "70206412"):
+            config.set(("extractor", category, subcategory), "tiktok-range", pagination)
+        case ("c0d3c7b1", "1692405e") | ("03bfedaf", "e7d2ac0d"):
             config.set(("extractor",), "chapter-range", pagination)
         case _:
             config.set(("extractor",), "image-range", pagination)
-
-
-def _fnv1a(s):
-    h = 0x811C9DC5
-    for c in s.encode():
-        h ^= c
-        h = (h * 0x01000193) & 0xFFFFFFFF
-    return format(h, "08x")
 
 
 def normalize(category, subcategory, data, base_url, url=""):
@@ -483,6 +472,64 @@ def normalize(category, subcategory, data, base_url, url=""):
                         "url": f"{base_url}/@{post['user']}/{'video' if i < len(meta) and meta[i].get('type') == 'video' else 'photo'}/{post['id']}",
                     }
                     for i, post in enumerate(posts)
+                ],
+            }
+        case ("03bfedaf", "e7d2ac0d"):
+            urls = data.get("urls", [])
+            return {
+                "renderer": "media-board",
+                "items": [
+                    {
+                        "url": urls[i],
+                        "name": m.get("sub") or f"#{m['no']}",
+                        "description": (
+                            re.sub(r"<[^>]+>", " ", m["com"]).strip()
+                            if m.get("com")
+                            else None
+                        ),
+                        "count": m.get("replies"),
+                        "date": datetime.utcfromtimestamp(
+                            m["last_modified"]
+                        ).isoformat()
+                        + "Z",
+                        "thumbnail": (
+                            f"https://i.4cdn.org/{m['board']}/{m['tim']}s.jpg"
+                            if m.get("tim")
+                            else None
+                        ),
+                    }
+                    for i, m in enumerate(meta)
+                    if i < len(urls)
+                ],
+            }
+        case ("03bfedaf", "25ba7f3f"):
+            urls = data.get("urls", [])
+            return {
+                "renderer": "thread",
+                "items": [
+                    {
+                        "no": m.get("no"),
+                        "com": m.get("com"),
+                        "name": m.get("name"),
+                        "date": (
+                            datetime.utcfromtimestamp(m["time"]).isoformat() + "Z"
+                            if m.get("time")
+                            else None
+                        ),
+                        "thumbnail": (
+                            f"https://i.4cdn.org/{m['board']}/{m['tim']}s.jpg"
+                            if m.get("tim")
+                            else None
+                        ),
+                        "url": urls[i] if i < len(urls) and urls[i] else None,
+                        "filename": (
+                            f"{m['filename']}{m['ext']}"
+                            if m.get("filename") and m.get("ext")
+                            else None
+                        ),
+                        "resto": m.get("resto"),
+                    }
+                    for i, m in enumerate(meta)
                 ],
             }
         case ("b8d92073", "33295e95"):

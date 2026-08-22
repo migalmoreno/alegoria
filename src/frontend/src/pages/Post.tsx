@@ -2,6 +2,8 @@ import { Link, useParams } from "wouter";
 import {
   GalleryItem,
   BoardItem,
+  ThreadPost,
+  ThreadResponse,
   GroupBoardResponse,
   MediaBoardResponse,
   GalleryResponse,
@@ -20,6 +22,7 @@ import {
   GroupBoardItemContainer,
   ImagePostContainer,
   MediaBoardItemContainer,
+  ThreadPostContainer,
   ItemsContainer,
 } from "~/components";
 import { ErrorContainer, UserAvatar } from "~/components";
@@ -46,6 +49,15 @@ const MediaBoard = ({ url, initialData }: { url: string; initialData?: MediaBoar
     url={url}
     initialData={initialData}
     itemRenderer={(item, i) => <MediaBoardItemContainer key={i} post={item} />}
+  />
+);
+
+const Thread = ({ url, initialData }: { url: string; initialData?: ThreadResponse }) => (
+  <ItemsContainer<ThreadResponse, ThreadPost>
+    url={url}
+    initialData={initialData}
+    columns="grid-cols-1"
+    itemRenderer={(item, i) => <ThreadPostContainer key={i} post={item} />}
   />
 );
 
@@ -250,6 +262,8 @@ export const PostPage = () => {
       return <GroupBoard url={String(url)} initialData={page as GroupBoardResponse} />;
     case "media-board":
       return <MediaBoard url={String(url)} initialData={page as MediaBoardResponse} />;
+    case "thread":
+      return <Thread url={String(url)} initialData={page as ThreadResponse} />;
     case "user-info":
       return <UserInfo data={page as UserInfoResponse} />;
     case "user-profile":

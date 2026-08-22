@@ -89,6 +89,7 @@ export interface BoardItem {
   url: string;
   count?: number;
   date?: string;
+  description?: string;
 }
 
 export interface GroupBoardResponse {
@@ -101,10 +102,27 @@ export interface MediaBoardResponse {
   items: BoardItem[];
 }
 
+export interface ThreadPost {
+  no?: number;
+  com?: string;
+  name?: string;
+  date?: string;
+  thumbnail?: string;
+  url?: string;
+  filename?: string;
+  resto?: number;
+}
+
+export interface ThreadResponse {
+  renderer: "thread";
+  items: ThreadPost[];
+}
+
 export type PageResponse =
   | GalleryResponse
   | ImageResponse
   | GroupBoardResponse
   | MediaBoardResponse
+  | ThreadResponse
   | UserInfoResponse
   | UserProfileResponse;

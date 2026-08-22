@@ -12,19 +12,20 @@ interface ItemsPaginationContainerProps {
   hasNextPage?: boolean;
   error?: Error | null;
   children?: ReactNode;
+  columns?: string;
 }
 
 export const ItemsPaginationContainer = forwardRef<
   HTMLDivElement,
   ItemsPaginationContainerProps
->(({ hasNextPage, error, children }, ref) => {
+>(({ hasNextPage, error, children, columns }, ref) => {
   useEffect(() => {
     if (error)
       toast.error("Failed to load more", { description: error.message });
   }, [error]);
   return (
     <div className="flex flex-col w-full p-4">
-      <div className="grid w-full xs:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className={`grid w-full ${columns ?? "xs:grid-cols-3 lg:grid-cols-5"} gap-4`}>
         {children}
       </div>
       {hasNextPage && (
@@ -40,12 +41,14 @@ interface ItemsContainerProps<T extends { items: I[] }, I> {
   url: string;
   initialData?: T;
   itemRenderer: (item: I, index: number) => ReactNode;
+  columns?: string;
 }
 
 export const ItemsContainer = <T extends { items: I[] }, I>({
   url,
   initialData,
   itemRenderer,
+  columns,
 }: ItemsContainerProps<T, I>) => {
   const {
     data,
@@ -88,6 +91,7 @@ export const ItemsContainer = <T extends { items: I[] }, I>({
     <ItemsPaginationContainer
       hasNextPage={hasNextPage}
       error={error as Error}
+      columns={columns}
       ref={ref}
     >
       {items?.map((item, i) => itemRenderer(item, i))}
