@@ -1,7 +1,7 @@
 import { ArrowLeft, MenuIcon, SearchIcon } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, useLocation } from "wouter";
-import { Button } from "~/components";
+import { Button } from "./Button";
 import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,11 +34,12 @@ interface SearchSelectProps {
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   children?: ReactNode;
+  className?: string;
 }
 
-const SearchSelect = ({ value, onChange, children }: SearchSelectProps) => (
+const SearchSelect = ({ value, onChange, children, className }: SearchSelectProps) => (
   <select
-    className="appearance-none bg-neutral-200 rounded-md px-2 flex items-center text-center text-neutral-700 text-xs h-6 font-medium cursor-pointer outline-none"
+    className={`appearance-none bg-neutral-200 rounded-md px-2 flex items-center text-center text-neutral-700 text-xs h-6 font-medium cursor-pointer outline-none ${className ?? ""}`}
     value={value}
     onChange={onChange}
   >
@@ -118,30 +119,21 @@ const SearchForm = () => {
 
   return (
     <div className="flex gap-x-4 w-full md:w-auto flex-wrap sm:flex-nowrap gap-y-4 top-0">
-      <div className="flex w-full gap-x-2 relative">
-        <form
-          className="flex-auto border border-neutral-800 rounded-full px-4 py-2 w-full md:min-w-[300px] bg-neutral-900 flex"
-          onSubmit={handleSubmit(onSubmit)}
+      <form
+        className="flex-auto border border-neutral-800 rounded-full px-4 py-2 w-full md:min-w-[300px] bg-neutral-900 flex items-center gap-x-2"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <button
+          type="submit"
+          className="cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          disabled={!isSearchable}
         >
-          <input
-            className="outline-none pr-40 w-full disabled:opacity-40 disabled:cursor-not-allowed"
-            placeholder="Search"
-            disabled={!isSearchable}
-            onFocus={() => setCategorySelected(true)}
-            onInput={() => setCategorySelected(true)}
-            {...register("searchValue", { required: true })}
-          />
-          <button
-            type="submit"
-            className="cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            disabled={!isSearchable}
-          >
-            <SearchIcon size={18} />
-          </button>
-        </form>
+          <SearchIcon size={18} />
+        </button>
         {!categoriesError && (
-          <div className="flex gap-x-1 items-center absolute top-2.5 right-12">
+          <div className="flex gap-x-1 items-center w-40 shrink-0">
             <SearchSelect
+              className="flex-1 min-w-0"
               value={activeCategory?.name}
               onChange={async (e) => {
                 setCategorySelected(true);
@@ -154,10 +146,7 @@ const SearchForm = () => {
                     ? category.subcategories[0]
                     : undefined;
                 dispatch({ type: "setActiveSubCategory", subcategory });
-                await handleNonSearchableSubcategory(
-                  category.name,
-                  subcategory,
-                );
+                await handleNonSearchableSubcategory(category.name, subcategory);
               }}
             >
               {categories.map((category, i) => (
@@ -168,16 +157,14 @@ const SearchForm = () => {
             </SearchSelect>
             {activeCategory && activeCategory?.subcategories?.length > 0 && (
               <SearchSelect
+                className="flex-1 min-w-0"
                 value={activeSubCategory?.name}
                 onChange={async (e) => {
                   const subcategory = activeCategory?.subcategories.find(
                     (subcategory) => subcategory.name === e.target.value,
                   ) as SubCategory;
                   dispatch({ type: "setActiveSubCategory", subcategory });
-                  await handleNonSearchableSubcategory(
-                    activeCategory?.name ?? "",
-                    subcategory,
-                  );
+                  await handleNonSearchableSubcategory(activeCategory?.name ?? "", subcategory);
                 }}
               >
                 {activeCategory.subcategories.map((subcategory, i) => (
@@ -189,7 +176,15 @@ const SearchForm = () => {
             )}
           </div>
         )}
-      </div>
+        <input
+          className="outline-none flex-1 min-w-0 disabled:opacity-40 disabled:cursor-not-allowed"
+          placeholder="Search"
+          disabled={!isSearchable}
+          onFocus={() => setCategorySelected(true)}
+          onInput={() => setCategorySelected(true)}
+          {...register("searchValue", { required: true })}
+        />
+      </form>
     </div>
   );
 };
