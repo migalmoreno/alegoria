@@ -1,5 +1,6 @@
 import { Route, Router, Switch } from "wouter";
-import { HomePage, PostPage, Layout } from "./components";
+import { Layout } from "./components";
+import { HomePage, PostPage } from "./pages";
 import {
   QueryClient,
   QueryClientProvider,

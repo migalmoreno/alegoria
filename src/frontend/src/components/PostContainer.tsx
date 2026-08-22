@@ -1,16 +1,11 @@
 import { Link } from "wouter";
-import {
-  UserExtractor,
-  ImagePost,
-  BoardPost,
-  PostExtractor,
-} from "../../types";
+import { GalleryItem, BoardItem } from "~/types";
 import { formatTimeAgo } from "~/utils";
-import { Bullet, UserAvatar } from "../layout";
-import { useQuery } from "@tanstack/react-query";
+import { Bullet } from "./Bullet";
+import { UserAvatar } from "./UserAvatar";
 
 interface ImagePostContainerProps {
-  post?: ImagePost;
+  post?: GalleryItem;
   extraClassName?: string;
 }
 
@@ -83,16 +78,15 @@ export const ImagePostContainer = ({
   );
 };
 
-interface GroupBoardPostContainerProps<T> {
-  post?: BoardPost;
-  extractor: UserExtractor<T>;
+interface GroupBoardItemContainerProps {
+  post?: BoardItem;
   extraClassName?: string;
 }
 
-export const GroupBoardPostContainer = <T,>({
+export const GroupBoardItemContainer = ({
   post,
   extraClassName,
-}: GroupBoardPostContainerProps<T>) => {
+}: GroupBoardItemContainerProps) => {
   return (
     <div className="flex flex-col gap-y-2">
       <div
@@ -117,22 +111,22 @@ export const GroupBoardPostContainer = <T,>({
         <div className="flex text-neutral-400 text-xs items-center gap-x-1">
           {post?.count && post.count > 0 && <span>{post.count} items</span>}
           {post?.count && post.count > 0 && post?.date && <Bullet />}
-          {post?.date && <span>{formatTimeAgo(post.date)}</span>}
+          {post?.date && <span>{formatTimeAgo(new Date(post.date))}</span>}
         </div>
       </div>
     </div>
   );
 };
 
-interface MediaBoardPostContainerProps {
-  post?: BoardPost;
+interface MediaBoardItemContainerProps {
+  post?: BoardItem;
   extraClassName?: string;
 }
 
-export const MediaBoardPostContainer = ({
+export const MediaBoardItemContainer = ({
   post,
   extraClassName,
-}: MediaBoardPostContainerProps) => {
+}: MediaBoardItemContainerProps) => {
   return (
     <div className="flex flex-col gap-y-2">
       <div
@@ -157,35 +151,9 @@ export const MediaBoardPostContainer = ({
         <div className="flex text-neutral-400 text-xs items-center gap-x-1">
           {post?.count && post.count > 0 && <span>{post.count} items</span>}
           {post?.count && post.count > 0 && post?.date && <Bullet />}
-          {post?.date && <span>{formatTimeAgo(post.date)}</span>}
+          {post?.date && <span>{formatTimeAgo(new Date(post.date))}</span>}
         </div>
       </div>
     </div>
-  );
-};
-
-interface UserPageStreamPostProps<T> {
-  url: string;
-  extractor: PostExtractor<T>;
-  baseUrl?: string;
-}
-
-export const DynamicImagePost = <T,>({
-  url,
-  extractor,
-  baseUrl,
-}: UserPageStreamPostProps<T>) => {
-  const { data, isSuccess } = useQuery({
-    queryKey: [`/posts/${encodeURIComponent(url)}`],
-    select: (data: T) => extractor.extractor(data, baseUrl),
-  });
-
-  return (
-    <ImagePostContainer
-      post={data}
-      extraClassName={
-        isSuccess ? "" : "animate-[pulse_0.7s_ease-in-out_infinite]"
-      }
-    />
   );
 };

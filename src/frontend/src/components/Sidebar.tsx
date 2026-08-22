@@ -1,6 +1,6 @@
 import { ReactElement, useEffect } from "react";
 import { toast } from "sonner";
-import type { Category, CategoryConfig } from "~/types";
+import type { Category } from "~/types";
 import { HomeIcon } from "lucide-react";
 import { Link } from "wouter";
 import { SharedNavbarSubMenu } from "./Navbar";
@@ -8,8 +8,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
-import { pageSchema } from "~/page-schema";
-import { hash } from "~/utils";
 import { abbreviatedSha } from "~build/git";
 
 interface MenuLinkProps {
@@ -70,26 +68,13 @@ export const Sidebar = () => {
     dispatch({ type: "setCategories", categories: fetchedCategories });
     const enabledCategories = [
       { name: "url", subcategories: [] },
-      ...fetchedCategories
-        .filter((category: Category) =>
-          Object.keys(pageSchema).includes(hash(category.name)),
-        )
-        .map((category: Category) => ({
-          ...category,
-          subcategories: category.subcategories
-            .filter((subcategory) =>
-              Object.keys(
-                (pageSchema as CategoryConfig)[hash(category.name)] ?? {},
-              ).includes(hash(category.name + subcategory.name)),
-            )
-            .map((subcategory) => ({
-              ...subcategory,
-              searchable:
-                (pageSchema as CategoryConfig)[hash(category.name)]?.[
-                  hash(category.name + subcategory.name)
-                ]?.searchable !== false,
-            })),
+      ...fetchedCategories.map((category: Category) => ({
+        ...category,
+        subcategories: category.subcategories.map((subcategory) => ({
+          ...subcategory,
+          searchable: true,
         })),
+      })),
     ];
     dispatch({ type: "setEnabledCategories", categories: enabledCategories });
   }, [fetchedCategories]);

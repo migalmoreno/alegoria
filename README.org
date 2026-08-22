@@ -34,5 +34,3 @@ To add support for a new gallery-dl extractor, first inspect the API response sh
 #+begin_src sh
 curl -s "http://localhost:5000/api/v1/posts/<url>" | jq .
 #+end_src
-
-Use the response to write the extractor mapping in [[file:src/frontend/src/page-schema.ts][page-schema.ts]].
