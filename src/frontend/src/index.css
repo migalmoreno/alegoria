@@ -3,6 +3,6 @@
   --breakpoint-xs: 480px;
 }
 
-html {
-  scroll-padding-top: 60px;
+:target {
+  scroll-margin-top: 60px;
 }
