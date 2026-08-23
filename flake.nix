@@ -19,6 +19,7 @@
               uv
               gallery-dl
               nodejs
+              (yarn.override { nodejs = null; })
             ];
             shellHook = ''
               unset PYTHONPATH
