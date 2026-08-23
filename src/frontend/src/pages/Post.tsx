@@ -28,7 +28,13 @@ import {
 import { ErrorContainer, UserAvatar } from "~/components";
 import { formatTimeAgo } from "~/utils";
 
-const Gallery = ({ url, initialData }: { url: string; initialData?: GalleryResponse }) => (
+const Gallery = ({
+  url,
+  initialData,
+}: {
+  url: string;
+  initialData?: GalleryResponse;
+}) => (
   <ItemsContainer<GalleryResponse, GalleryItem>
     url={url}
     initialData={initialData}
@@ -36,7 +42,13 @@ const Gallery = ({ url, initialData }: { url: string; initialData?: GalleryRespo
   />
 );
 
-const GroupBoard = ({ url, initialData }: { url: string; initialData?: GroupBoardResponse }) => (
+const GroupBoard = ({
+  url,
+  initialData,
+}: {
+  url: string;
+  initialData?: GroupBoardResponse;
+}) => (
   <ItemsContainer<GroupBoardResponse, BoardItem>
     url={url}
     initialData={initialData}
@@ -44,15 +56,28 @@ const GroupBoard = ({ url, initialData }: { url: string; initialData?: GroupBoar
   />
 );
 
-const MediaBoard = ({ url, initialData }: { url: string; initialData?: MediaBoardResponse }) => (
+const MediaBoard = ({
+  url,
+  initialData,
+}: {
+  url: string;
+  initialData?: MediaBoardResponse;
+}) => (
   <ItemsContainer<MediaBoardResponse, BoardItem>
     url={url}
     initialData={initialData}
+    columns="xs:grid-cols-2 lg:grid-cols-3"
     itemRenderer={(item, i) => <MediaBoardItemContainer key={i} post={item} />}
   />
 );
 
-const Thread = ({ url, initialData }: { url: string; initialData?: ThreadResponse }) => (
+const Thread = ({
+  url,
+  initialData,
+}: {
+  url: string;
+  initialData?: ThreadResponse;
+}) => (
   <ItemsContainer<ThreadResponse, ThreadPost>
     url={url}
     initialData={initialData}
@@ -151,12 +176,12 @@ const ImageView = ({ data }: { data: ImageResponse }) => (
               poster={data.posterUrl}
               controls
             />
-          ) : (
+          ) : data.url ? (
             <img
               src={data.url}
               className="object-cover min-w-full max-w-full min-h-full max-h-full"
             />
-          )}
+          ) : null}
         </div>
         <div className="md:border-l border-neutral-800 md:w-[300px] md:shrink-0 md:p-0 flex flex-col gap-y-2 py-4 p-2">
           <div className="md:border-b border-neutral-800 md:p-4 flex gap-x-2 gap-y-4 items-center px-2 justify-between md:justify-normal md:flex-wrap text-sm">
@@ -259,9 +284,19 @@ export const PostPage = () => {
     case "image":
       return <ImageView data={page as ImageResponse} />;
     case "group-board":
-      return <GroupBoard url={String(url)} initialData={page as GroupBoardResponse} />;
+      return (
+        <GroupBoard
+          url={String(url)}
+          initialData={page as GroupBoardResponse}
+        />
+      );
     case "media-board":
-      return <MediaBoard url={String(url)} initialData={page as MediaBoardResponse} />;
+      return (
+        <MediaBoard
+          url={String(url)}
+          initialData={page as MediaBoardResponse}
+        />
+      );
     case "thread":
       return <Thread url={String(url)} initialData={page as ThreadResponse} />;
     case "user-info":

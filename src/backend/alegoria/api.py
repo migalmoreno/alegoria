@@ -1,3 +1,4 @@
+import html as _html
 import requests
 import os
 import json
@@ -12,6 +13,8 @@ from flask import Blueprint, request, jsonify, make_response, Response
 from urllib.parse import unquote, urlparse, urljoin, quote
 from http import HTTPStatus
 from datetime import datetime
+
+from gallery_dl.extractor.reddit import RedditAPI as _RedditAPI
 
 from . import extractors as _extractors_patch
 from .utils import fnv1a as _fnv1a
@@ -96,14 +99,14 @@ def proxy():
     res = requests.request(
         method=request.method,
         url=url,
-        headers={k: v for k, v in request.headers if k.lower() != "host"}
+        headers={k: v for k, v in request.headers if k.lower() not in {"host", "referer", "origin"}}
         | extra_headers,
         data=request.get_data(),
         cookies=request.cookies,
         allow_redirects=allow_redirects,
     )
     content = res.content
-    excluded = {"transfer-encoding", "content-encoding", "content-length"}
+    excluded = {"transfer-encoding", "content-encoding", "content-length", "set-cookie"}
     headers = [(k, v) for k, v in res.raw.headers.items() if k.lower() not in excluded]
     headers.append(("Content-Length", str(len(content))))
     return Response(content, res.status_code, headers)
@@ -185,11 +188,20 @@ def get_extractors():
 
 
 def apply_extractor_config(category, subcategory, pagination):
+    start, end = (int(x) for x in pagination.split("-"))
+    page_size = end - start + 1
     match (_fnv1a(category), _fnv1a(category + subcategory)):
         case ("b8d92073", "70206412"):
             config.set(("extractor", category, subcategory), "tiktok-range", pagination)
         case ("c0d3c7b1", "1692405e") | ("03bfedaf", "e7d2ac0d"):
             config.set(("extractor",), "chapter-range", pagination)
+        case ("bd300ce5", sub) if sub in ("2493dc95", "2c906dae", "ba419d12"):
+            config.set(("extractor", "reddit"), "client-id", _RedditAPI.CLIENT_ID)
+            config.set(("extractor", "reddit"), "limit", page_size)
+            config.set(("extractor",), "chapter-range", pagination)
+        case ("bd300ce5", _):
+            config.set(("extractor", "reddit"), "client-id", _RedditAPI.CLIENT_ID)
+            config.set(("extractor",), "image-range", pagination)
         case _:
             config.set(("extractor",), "image-range", pagination)
 
@@ -397,7 +409,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "groupThumbnail": post["board"]["image_cover_url"],
                 "groupUrl": f"{base_url}{post['board']['url']}",
             }
-        case ("ce200ea0", "404ea5a3") | ("ce200ea0", "36c7e141") | ("ce200ea0", "1601e678"):
+        case (
+            ("ce200ea0", "404ea5a3")
+            | ("ce200ea0", "36c7e141")
+            | ("ce200ea0", "1601e678")
+        ):
             return {
                 "renderer": "gallery",
                 "searchable": False,
@@ -409,7 +425,9 @@ def normalize(category, subcategory, data, base_url, url=""):
                         ),
                         "url": f"{base_url}/{post['creator']}/{post['id']}",
                         "authorName": post.get("creator"),
-                        "authorThumbnail": (post.get("profile") or {}).get("profile_pic"),
+                        "authorThumbnail": (post.get("profile") or {}).get(
+                            "profile_pic"
+                        ),
                         "authorUrl": f"{base_url}/{post.get('creator')}",
                     }
                     for post in meta
@@ -470,7 +488,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                         "url": urls[i],
                         "name": m.get("sub") or f"#{m['no']}",
                         "description": (
-                            re.sub(r"<[^>]+>", " ", m["com"]).strip()
+                            _html.unescape(re.sub(r"<[^>]+>", " ", m["com"])).strip()
                             if m.get("com")
                             else None
                         ),
@@ -518,6 +536,164 @@ def normalize(category, subcategory, data, base_url, url=""):
                     }
                     for i, m in enumerate(meta)
                 ],
+            }
+        case (
+            ("bd300ce5", "2493dc95")
+            | ("bd300ce5", "2c906dae")
+            | ("bd300ce5", "ba419d12")
+        ):
+            urls = data.get("urls", [])
+            return {
+                "renderer": "media-board",
+                **({"searchable": False} if key == ("bd300ce5", "2c906dae") else {}),
+                "items": [
+                    {
+                        "url": urls[i] if i < len(urls) else None,
+                        "name": m.get("title"),
+                        "thumbnail": next(
+                            (
+                                v
+                                for v in [
+                                    _html.unescape(
+                                        (
+                                            (
+                                                (m.get("preview") or {}).get("images")
+                                                or [{}]
+                                            )[0].get("source")
+                                            or {}
+                                        ).get("url", "")
+                                    )
+                                    or None,
+                                    (
+                                        m.get("thumbnail")
+                                        if (m.get("thumbnail") or "").startswith(
+                                            "https://"
+                                        )
+                                        else None
+                                    ),
+                                ]
+                                if v
+                            ),
+                            None,
+                        ),
+                        "description": (
+                            m.get("selftext")[:200] if m.get("selftext") else None
+                        ),
+                        "count": m.get("num_comments"),
+                        "score": m.get("score"),
+                        "date": (
+                            datetime.utcfromtimestamp(m["created_utc"]).isoformat()
+                            + "Z"
+                            if m.get("created_utc")
+                            else None
+                        ),
+                    }
+                    for i, m in enumerate(meta)
+                ],
+            }
+        case ("bd300ce5", "578a8689"):
+            urls = [u for u in data.get("urls", []) if not u.startswith("ytdl:")]
+            items = []
+            for i, m in enumerate(meta):
+                if m.get("_reddit_type") == "submission" or m.get("title"):
+                    title = m.get("title", "")
+                    selftext_html = re.sub(
+                        r"<!--.*?-->", "", _html.unescape(m.get("selftext_html") or "")
+                    ).strip()
+                    com = f"<p><strong>{_html.escape(title)}</strong></p>"
+                    if selftext_html:
+                        com += selftext_html
+                    thumbnail = next(
+                        (
+                            v
+                            for v in [
+                                _html.unescape(
+                                    (
+                                        (
+                                            (m.get("preview") or {}).get("images")
+                                            or [{}]
+                                        )[0].get("source")
+                                        or {}
+                                    ).get("url", "")
+                                )
+                                or None,
+                                (
+                                    m.get("thumbnail")
+                                    if (m.get("thumbnail") or "").startswith("https://")
+                                    else None
+                                ),
+                            ]
+                            if v
+                        ),
+                        None,
+                    )
+                    sub_url = m.get("url", "")
+                    if m.get("is_video"):
+                        reddit_video = (m.get("media") or {}).get("reddit_video") or {}
+                        media_url = reddit_video.get("fallback_url") or reddit_video.get("hls_url") or None
+                        media_type = "video"
+                        source_url = None
+                    elif sub_url.startswith("https://i.redd.it/"):
+                        media_url = sub_url
+                        media_type = "image"
+                        source_url = None
+                    elif sub_url and not m.get("is_self") and "reddit.com" not in sub_url:
+                        media_url = None
+                        media_type = None
+                        source_url = sub_url
+                        thumbnail = m.get("thumbnail") or thumbnail
+                    else:
+                        media_url = None
+                        media_type = None
+                        source_url = None
+                    author = m.get("author")
+                    subreddit = m.get("subreddit")
+                    items.append(
+                        {
+                            "com": com,
+                            "name": author,
+                            "authorUrl": f"{base_url}/user/{author}" if author else None,
+                            "date": (
+                                datetime.utcfromtimestamp(m["created_utc"]).isoformat()
+                                + "Z"
+                                if m.get("created_utc")
+                                else None
+                            ),
+                            "thumbnail": thumbnail,
+                            "url": media_url,
+                            "mediaType": media_type,
+                            "sourceUrl": source_url,
+                            "postUrl": url,
+                            "score": m.get("score"),
+                            "count": m.get("num_comments"),
+                            "groupName": f"r/{subreddit}" if subreddit else None,
+                            "groupUrl": f"{base_url}/r/{subreddit}" if subreddit else None,
+                        }
+                    )
+                else:
+                    body_html = re.sub(
+                        r"<!--.*?-->", "", _html.unescape(m.get("body_html") or "")
+                    ).strip()
+                    if not body_html:
+                        continue
+                    author = m.get("author")
+                    items.append(
+                        {
+                            "com": body_html,
+                            "name": author,
+                            "authorUrl": f"{base_url}/user/{author}" if author else None,
+                            "date": (
+                                datetime.utcfromtimestamp(m["created_utc"]).isoformat()
+                                + "Z"
+                                if m.get("created_utc")
+                                else None
+                            ),
+                            "score": m.get("score"),
+                        }
+                    )
+            return {
+                "renderer": "thread",
+                "items": items,
             }
         case ("b8d92073", "33295e95"):
             posts = data.get("post", [])

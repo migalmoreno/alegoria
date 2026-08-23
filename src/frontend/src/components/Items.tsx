@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useFetchOnScroll } from "~/hooks";
 import { ErrorContainer } from "./ErrorContainer";
 import { LoadingContainer } from "./LoadingContainer";
+import { NoDataContainer } from "./NoDataContainer";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -25,7 +26,9 @@ export const ItemsPaginationContainer = forwardRef<
   }, [error]);
   return (
     <div className="flex flex-col w-full p-4">
-      <div className={`grid w-full ${columns ?? "xs:grid-cols-3 lg:grid-cols-5"} gap-4`}>
+      <div
+        className={`grid w-full ${columns ?? "xs:grid-cols-3 lg:grid-cols-5"} gap-4`}
+      >
         {children}
       </div>
       {hasNextPage && (
@@ -86,6 +89,7 @@ export const ItemsContainer = <T extends { items: I[] }, I>({
 
   if (isPending) return <LoadingContainer />;
   if (error && !items?.length) return <ErrorContainer error={error as Error} />;
+  if (!items?.length) return <NoDataContainer />;
 
   return (
     <ItemsPaginationContainer

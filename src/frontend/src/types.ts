@@ -88,6 +88,7 @@ export interface BoardItem {
   thumbnail?: string;
   url: string;
   count?: number;
+  score?: number;
   date?: string;
   description?: string;
 }
@@ -106,9 +107,17 @@ export interface ThreadPost {
   no?: number;
   com?: string;
   name?: string;
+  authorUrl?: string;
   date?: string;
   thumbnail?: string;
   url?: string;
+  mediaType?: string;
+  sourceUrl?: string;
+  postUrl?: string;
+  score?: number;
+  count?: number;
+  groupName?: string;
+  groupUrl?: string;
   filename?: string;
   resto?: number;
 }

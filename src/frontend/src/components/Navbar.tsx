@@ -112,10 +112,13 @@ const SearchForm = () => {
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
     if (extractor) {
       const searchUrl = extractor.url;
-      const interpolatedUrl = searchUrl.replace(
-        new RegExp(`/${extractor.groups[0]}(/|$)`),
-        `/${formData.searchValue}$1`,
-      );
+      const placeholder = extractor.groups[0]?.split("/").filter(Boolean).pop();
+      const interpolatedUrl = placeholder
+        ? searchUrl.replace(
+            new RegExp(`([/@])${placeholder}(/|$)`),
+            `$1${formData.searchValue}$2`,
+          )
+        : searchUrl;
       navigate(`/post/${encodeURIComponent(interpolatedUrl)}`);
     } else {
       navigate(`/post/${encodeURIComponent(formData.searchValue)}`);
