@@ -176,6 +176,37 @@ def proxy():
     return Response(content, res.status_code, headers)
 
 
+_SEARCH_SUBCATEGORIES = {
+    "aac97454": {
+        "name": "subreddit-search",
+        "example": "https://www.reddit.com/r/SUBREDDIT/search/?q=QUERY&restrict_sr=1",
+        "groups": ["QUERY", "SUBREDDIT"],
+    },
+    "d04699c9": {
+        "name": "search",
+        "example": "https://www.reddit.com/search/?q=QUERY",
+        "groups": ["QUERY"],
+    },
+    "e05a81c1": {
+        "name": "user-search",
+        "example": "https://www.reddit.com/user/USER/search/?q=QUERY",
+        "groups": ["QUERY", "USER"],
+    },
+    "f3e9f8dc": {
+        "name": "top",
+        "example": "https://www.reddit.com/top/?t=FILTER",
+        "groups": ["FILTER"],
+        "filters": ["hour", "day", "week", "month", "year", "all"],
+    },
+    "0160e943": {
+        "name": "subreddit-top",
+        "example": "https://www.reddit.com/r/SUBREDDIT/top/?t=FILTER",
+        "groups": ["/r/SUBREDDIT", None, None, "FILTER"],
+        "filters": ["hour", "day", "week", "month", "year", "all"],
+    },
+}
+
+
 def get_grouped_extractors():
     groups = []
     for k, g in groupby(_extractors, key=lambda ext: ext.basecategory or ext.category):
@@ -192,6 +223,17 @@ def get_grouped_extractors():
                     "searchable": normalized.get("searchable", True),
                 }
             )
+        if _fnv1a(k) == "bd300ce5" and exts:
+            cat = exts[0]["category"]
+            for sub in _SEARCH_SUBCATEGORIES.values():
+                exts.append(
+                    {
+                        "name": sub["name"],
+                        "category": cat,
+                        "example": sub["example"],
+                        "searchable": sub.get("searchable", True),
+                    }
+                )
         if exts:
             groups.append({"name": k, "subcategories": exts})
 
@@ -226,6 +268,22 @@ def get_extractors():
             category = extractor.category
             subcategory = extractor.subcategory
 
+    if category and subcategory:
+        sub_hash = _fnv1a(category + subcategory)
+        if sub_hash in _SEARCH_SUBCATEGORIES:
+            sub_info = _SEARCH_SUBCATEGORIES[sub_hash]
+            ext_inst = find_extractor(sub_info["example"])
+            return make_response(
+                {
+                    "category": category,
+                    "subcategory": subcategory,
+                    "url": sub_info["example"],
+                    "groups": sub_info["groups"],
+                    "configPath": ext_inst._cfgpath if ext_inst else [category],
+                    **({"filters": sub_info["filters"]} if "filters" in sub_info else {}),
+                }
+            )
+
     for extractor_group in groups:
         if extractor_group["category"] == category:
             extractor = next(
@@ -255,6 +313,9 @@ def apply_extractor_config(category, subcategory, pagination):
     start, end = (int(x) for x in pagination.split("-"))
     page_size = end - start + 1
     match (_fnv1a(category), _fnv1a(category + subcategory)):
+        case ("e88db17b", _):
+            config.set(("extractor", "instagram"), "cookies-from-browser", "chrome")
+            config.set(("extractor",), "image-range", pagination)
         case ("b8d92073", "70206412"):
             config.set(("extractor", category, subcategory), "tiktok-range", pagination)
         case ("c0d3c7b1", "1692405e") | ("03bfedaf", "e7d2ac0d"):
@@ -493,24 +554,23 @@ def normalize(category, subcategory, data, base_url, url=""):
             | ("ce200ea0", "36c7e141")
             | ("ce200ea0", "1601e678")
         ):
+            items = [
+                {
+                    "thumbnail": urljoin(
+                        f"{(p := urlparse(post['url'])).scheme}://{p.netloc}/",
+                        post["thumbnail_path"],
+                    ),
+                    "url": f"{base_url}/{post['creator']}/{post['id']}",
+                    "authorName": post.get("creator"),
+                    "authorThumbnail": (post.get("profile") or {}).get("profile_pic"),
+                    "authorUrl": f"{base_url}/{post.get('creator')}",
+                }
+                for post in meta
+            ]
             return {
                 "renderer": "gallery",
-                "searchable": False,
-                "items": [
-                    {
-                        "thumbnail": urljoin(
-                            f"{(p := urlparse(post['url'])).scheme}://{p.netloc}/",
-                            post["thumbnail_path"],
-                        ),
-                        "url": f"{base_url}/{post['creator']}/{post['id']}",
-                        "authorName": post.get("creator"),
-                        "authorThumbnail": (post.get("profile") or {}).get(
-                            "profile_pic"
-                        ),
-                        "authorUrl": f"{base_url}/{post.get('creator')}",
-                    }
-                    for post in meta
-                ],
+                **({"searchable": False} if key[1] in ("36c7e141", "1601e678") else {}),
+                "items": items,
             }
         case ("ce200ea0", "5262c92a"):
             if not meta:
@@ -620,6 +680,11 @@ def normalize(category, subcategory, data, base_url, url=""):
             ("bd300ce5", "2493dc95")
             | ("bd300ce5", "2c906dae")
             | ("bd300ce5", "ba419d12")
+            | ("bd300ce5", "aac97454")
+            | ("bd300ce5", "3ce02945")
+            | ("bd300ce5", "e05a81c1")
+            | ("bd300ce5", "8366fc68")
+            | ("bd300ce5", "0160e943")
         ):
             urls = data.get("urls", [])
             return {

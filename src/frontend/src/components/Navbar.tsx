@@ -6,7 +6,7 @@ import { useAppStore } from "~/store";
 import { useShallow } from "zustand/shallow";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Category, Extractor, SubCategory } from "~/types";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 
 export const SharedNavbarSubMenu = () => {
   const [showMobileMenu, dispatch] = useAppStore(
@@ -58,8 +58,9 @@ export interface Inputs {
 
 const SearchForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
-  const [_, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [isCategorySelected, setCategorySelected] = useState<boolean>();
+  const [selectedFilter, setSelectedFilter] = useState("");
   const queryClient = useQueryClient();
 
   const [
@@ -78,7 +79,37 @@ const SearchForm = () => {
     ]),
   );
 
-  const isSearchable = activeSubCategory?.searchable !== false;
+  const currentPageUrl = useMemo(() => {
+    const match = location.match(/^\/post\/(.+)$/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }, [location]);
+
+  const contextualSubcategories = useMemo(() => {
+    if (!activeCategory) return [];
+    return activeCategory.subcategories.filter((sub) => {
+      if (sub.name.startsWith("subreddit-"))
+        return /\/r\/[^/?#]+/.test(currentPageUrl);
+      if (sub.name.startsWith("user-"))
+        return /\/user\/[^/?#]+/.test(currentPageUrl);
+      return true;
+    });
+  }, [activeCategory, currentPageUrl]);
+
+  useEffect(() => {
+    if (
+      activeSubCategory &&
+      !contextualSubcategories.find((s) => s.name === activeSubCategory.name)
+    ) {
+      dispatch({
+        type: "setActiveSubCategory",
+        subcategory: contextualSubcategories[0],
+      });
+    }
+  }, [contextualSubcategories]);
+
+  useEffect(() => {
+    setSelectedFilter("");
+  }, [activeSubCategory?.name]);
 
   const handleNonSearchableSubcategory = async (
     categoryName: string,
@@ -109,26 +140,54 @@ const SearchForm = () => {
     gcTime: Infinity,
   });
 
-  const onSubmit: SubmitHandler<Inputs> = async (formData) => {
-    if (extractor) {
-      const searchUrl = extractor.url;
-      const placeholder = extractor.groups[0]?.split("/").filter(Boolean).pop();
-      const interpolatedUrl = placeholder
-        ? searchUrl.replace(
-            new RegExp(`([/@])${placeholder}(/|$)`),
-            `$1${formData.searchValue}$2`,
-          )
-        : searchUrl;
-      navigate(`/post/${encodeURIComponent(interpolatedUrl)}`);
-    } else {
-      navigate(`/post/${encodeURIComponent(formData.searchValue)}`);
+  const isFilterOnly =
+    !!extractor?.filters && !extractor.groups.some((g) => g === "QUERY");
+  const isSearchable =
+    activeSubCategory?.searchable !== false || !!extractor?.filters;
+
+  const buildUrl = (filterValue: string, searchValue: string = "") => {
+    if (!extractor) return encodeURIComponent(searchValue);
+    let url = extractor.url;
+    const urlPathParts = url.split("?")[0].split("/").filter(Boolean);
+    const hasQueryGroup = extractor.groups.some((g) => g === "QUERY");
+    for (const [i, group] of extractor.groups.entries()) {
+      if (!group) continue;
+      const raw = group.split("/").filter(Boolean).pop() ?? group;
+      let value: string;
+      if (extractor.filters && raw === "FILTER") {
+        value = filterValue;
+      } else if (
+        hasQueryGroup ? raw === "QUERY" : !extractor.filters && i === 0
+      ) {
+        value = encodeURIComponent(searchValue);
+      } else {
+        const pi = urlPathParts.indexOf(raw);
+        const pattern =
+          pi > 0 ? new RegExp(`/${urlPathParts[pi - 1]}/([^/?#&]+)/`) : null;
+        value = pattern ? (currentPageUrl.match(pattern)?.[1] ?? "") : "";
+      }
+      url = url.replace(
+        new RegExp(`(^|[^a-zA-Z0-9])${raw}([^a-zA-Z0-9]|$)`, "g"),
+        `$1${value}$2`,
+      );
     }
+    return url;
+  };
+
+  const onSubmit: SubmitHandler<Inputs> = async (formData) => {
+    const url = extractor
+      ? buildUrl(
+          selectedFilter || extractor.filters?.[0] || "",
+          formData.searchValue,
+        )
+      : formData.searchValue;
+    navigate(`/post/${encodeURIComponent(url)}`);
   };
 
   return (
-    <div className="flex gap-x-4 w-full md:w-auto flex-wrap sm:flex-nowrap gap-y-4 top-0">
+    <div className="flex gap-x-4 w-full md:w-[420px] flex-wrap sm:flex-nowrap gap-y-4 top-0">
       <form
-        className="flex-auto border border-neutral-800 rounded-full px-4 py-2 w-full md:min-w-[300px] bg-neutral-900 flex items-center gap-x-2"
+        className="flex-1 border border-neutral-800 rounded-full px-4 py-2 w-full bg-neutral-900 flex items-center gap-x-2"
         onSubmit={handleSubmit(onSubmit)}
       >
         <button
@@ -139,9 +198,8 @@ const SearchForm = () => {
           <SearchIcon size={18} />
         </button>
         {!categoriesError && (
-          <div className="flex gap-x-1 items-center w-40 shrink-0">
+          <div className="flex gap-x-1 items-center shrink-0">
             <SearchSelect
-              className="flex-1 min-w-0"
               value={activeCategory?.name}
               onChange={async (e) => {
                 setCategorySelected(true);
@@ -166,12 +224,12 @@ const SearchForm = () => {
                 </option>
               ))}
             </SearchSelect>
-            {activeCategory && activeCategory?.subcategories?.length > 0 && (
+            {contextualSubcategories.length > 0 && (
               <SearchSelect
-                className="flex-1 min-w-0"
                 value={activeSubCategory?.name}
                 onChange={async (e) => {
-                  const subcategory = activeCategory?.subcategories.find(
+                  setCategorySelected(true);
+                  const subcategory = contextualSubcategories.find(
                     (subcategory) => subcategory.name === e.target.value,
                   ) as SubCategory;
                   dispatch({ type: "setActiveSubCategory", subcategory });
@@ -181,9 +239,28 @@ const SearchForm = () => {
                   );
                 }}
               >
-                {activeCategory.subcategories.map((subcategory, i) => (
+                {contextualSubcategories.map((subcategory, i) => (
                   <option key={i} value={subcategory.name}>
                     {subcategory.name}
+                  </option>
+                ))}
+              </SearchSelect>
+            )}
+            {extractor?.filters && (
+              <SearchSelect
+                value={selectedFilter || extractor.filters[0]}
+                onChange={(e) => {
+                  setSelectedFilter(e.target.value);
+                  if (isFilterOnly) {
+                    navigate(
+                      `/post/${encodeURIComponent(buildUrl(e.target.value))}`,
+                    );
+                  }
+                }}
+              >
+                {extractor.filters.map((f, i) => (
+                  <option key={i} value={f}>
+                    {f}
                   </option>
                 ))}
               </SearchSelect>
@@ -191,12 +268,12 @@ const SearchForm = () => {
           </div>
         )}
         <input
-          className="outline-none flex-1 min-w-0 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="outline-none flex-1 min-w-0"
           placeholder="Search"
-          disabled={!isSearchable}
+          disabled={isFilterOnly || !isSearchable}
           onFocus={() => setCategorySelected(true)}
           onInput={() => setCategorySelected(true)}
-          {...register("searchValue", { required: true })}
+          {...register("searchValue", { required: !isFilterOnly })}
         />
       </form>
     </div>

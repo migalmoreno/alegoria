@@ -22,6 +22,7 @@ export interface Extractor {
   groups: string[];
   config_path: string[];
   url: string;
+  filters?: string[];
 }
 
 export interface GalleryItem {

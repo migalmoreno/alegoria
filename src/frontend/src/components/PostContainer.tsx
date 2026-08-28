@@ -154,6 +154,7 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
             {post.groupName}
           </Link>
         )}
+        {post?.groupName && post?.name && <Bullet />}
         {post?.name &&
           (post?.authorUrl ? (
             <Link
