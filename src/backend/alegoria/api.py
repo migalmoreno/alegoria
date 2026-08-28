@@ -3,6 +3,9 @@ import requests
 import os
 import json
 import re
+import random
+import time
+import logging
 import tempfile
 from gallery_dl.exception import GalleryDLException, NotFoundError
 from gallery_dl.extractor import extractors, find as find_extractor
@@ -14,7 +17,64 @@ from urllib.parse import unquote, urlparse, urljoin, quote
 from http import HTTPStatus
 from datetime import datetime
 
-from gallery_dl.extractor.reddit import RedditAPI as _RedditAPI
+_REDDIT_CLIENT_IDS = [
+    "ohXpoqrZYub1kg",
+    "6N9uN0krSDE-ig",
+]
+_REDDIT_ANDROID_VERSIONS = [
+    "Version 2024.22.1/Build 1652272",
+    "Version 2024.23.1/Build 1665606",
+    "Version 2024.24.1/Build 1682520",
+    "Version 2024.25.0/Build 1693595",
+    "Version 2024.25.2/Build 1700401",
+    "Version 2024.26.0/Build 1712645",
+    "Version 2024.27.0/Build 1724716",
+    "Version 2024.28.0/Build 1736729",
+    "Version 2024.29.0/Build 1748758",
+    "Version 2024.30.0/Build 1760827",
+    "Version 2024.31.0/Build 1772896",
+    "Version 2024.32.0/Build 1784965",
+    "Version 2024.33.0/Build 1797034",
+    "Version 2024.34.0/Build 1809103",
+    "Version 2024.35.0/Build 1821172",
+    "Version 2024.36.0/Build 1833241",
+    "Version 2024.37.0/Build 1845310",
+    "Version 2024.38.0/Build 1857379",
+    "Version 2024.39.0/Build 1869448",
+    "Version 2024.40.0/Build 1881517",
+    "Version 2024.41.0/Build 1893586",
+    "Version 2024.42.0/Build 1905655",
+    "Version 2024.43.0/Build 1917724",
+    "Version 2024.44.0/Build 1929793",
+    "Version 2024.45.0/Build 2001943",
+    "Version 2024.46.0/Build 2012731",
+    "Version 2024.47.0/Build 2029755",
+]
+_reddit_rate_limited_at: dict[str, float] = {}
+_current_reddit_client_id: str = _REDDIT_CLIENT_IDS[0]
+
+
+class _RedditRateLimitHandler(logging.Handler):
+    def emit(self, record):
+        if "rate limit exceeded" in record.getMessage().lower():
+            _reddit_rate_limited_at[_current_reddit_client_id] = time.monotonic()
+
+
+logging.getLogger("gallery_dl.extractor.reddit").addHandler(_RedditRateLimitHandler())
+
+
+def _best_reddit_client_id() -> str:
+    global _current_reddit_client_id
+    cid = min(_REDDIT_CLIENT_IDS, key=lambda c: _reddit_rate_limited_at.get(c, 0.0))
+    _current_reddit_client_id = cid
+    return cid
+
+
+def _reddit_android_ua() -> str:
+    version = random.choice(_REDDIT_ANDROID_VERSIONS)
+    android = random.randint(9, 14)
+    return f"Reddit/{version}/Android {android}"
+
 
 from . import extractors as _extractors_patch
 from .utils import fnv1a as _fnv1a
@@ -99,7 +159,11 @@ def proxy():
     res = requests.request(
         method=request.method,
         url=url,
-        headers={k: v for k, v in request.headers if k.lower() not in {"host", "referer", "origin"}}
+        headers={
+            k: v
+            for k, v in request.headers
+            if k.lower() not in {"host", "referer", "origin"}
+        }
         | extra_headers,
         data=request.get_data(),
         cookies=request.cookies,
@@ -195,12 +259,27 @@ def apply_extractor_config(category, subcategory, pagination):
             config.set(("extractor", category, subcategory), "tiktok-range", pagination)
         case ("c0d3c7b1", "1692405e") | ("03bfedaf", "e7d2ac0d"):
             config.set(("extractor",), "chapter-range", pagination)
-        case ("bd300ce5", sub) if sub in ("2493dc95", "2c906dae", "ba419d12"):
-            config.set(("extractor", "reddit"), "client-id", _RedditAPI.CLIENT_ID)
+        case ("bd300ce5", sub) if sub in (
+            "2493dc95",
+            "2c906dae",
+            "ba419d12",
+            "aac97454",
+            "3ce02945",
+            "e05a81c1",
+            "8366fc68",
+            "0160e943",
+        ):
+            config.set(("extractor", "reddit"), "client-id", _best_reddit_client_id())
+            config.set(
+                ("extractor", "reddit"), "user-agent-oauth", _reddit_android_ua()
+            )
             config.set(("extractor", "reddit"), "limit", page_size)
             config.set(("extractor",), "chapter-range", pagination)
         case ("bd300ce5", _):
-            config.set(("extractor", "reddit"), "client-id", _RedditAPI.CLIENT_ID)
+            config.set(("extractor", "reddit"), "client-id", _best_reddit_client_id())
+            config.set(
+                ("extractor", "reddit"), "user-agent-oauth", _reddit_android_ua()
+            )
             config.set(("extractor",), "image-range", pagination)
         case _:
             config.set(("extractor",), "image-range", pagination)
