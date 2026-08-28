@@ -2,7 +2,7 @@ export interface SubCategory {
   example: string;
   name: string;
   category: string;
-  description: string;
+  description?: string;
   searchable?: boolean;
 }
 
@@ -91,6 +91,9 @@ export interface BoardItem {
   score?: number;
   date?: string;
   description?: string;
+  groupName?: string;
+  groupUrl?: string;
+  groupThumbnail?: string;
 }
 
 export interface GroupBoardResponse {
@@ -101,10 +104,12 @@ export interface GroupBoardResponse {
 export interface MediaBoardResponse {
   renderer: "media-board";
   items: BoardItem[];
+  columns?: number;
 }
 
 export interface ThreadPost {
   no?: number;
+  title?: string;
   com?: string;
   name?: string;
   authorUrl?: string;
@@ -118,6 +123,7 @@ export interface ThreadPost {
   count?: number;
   groupName?: string;
   groupUrl?: string;
+  groupThumbnail?: string;
   filename?: string;
   resto?: number;
 }

@@ -131,72 +131,76 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
   const isVideo =
     post?.mediaType === "video" ||
     /\.(mp4|webm|mov|m4v)(\?|$)/i.test(post?.url ?? "");
+  const hasStats = (post?.score ?? 0) > 0 || (post?.count ?? 0) > 0;
 
   return (
     <div
       id={post?.no != null ? `p${post.no}` : undefined}
       className="flex flex-col gap-y-2 border border-neutral-800 rounded-xl p-3"
     >
-      <div className="flex items-center gap-x-2 text-xs text-neutral-400">
-        {post?.authorUrl ? (
-          <Link
-            href={`/post/${encodeURIComponent(post.authorUrl)}`}
-            className="font-semibold text-neutral-200"
-          >
-            {post.name ?? "Anonymous"}
-          </Link>
-        ) : (
-          <span className="font-semibold text-neutral-200">
-            {post?.name ?? "Anonymous"}
-          </span>
+      <div className="flex items-center gap-x-1.5 text-xs text-neutral-400">
+        {post?.groupThumbnail && (
+          <img
+            alt=""
+            className="h-4 w-4 rounded-full object-cover shrink-0"
+            src={proxyUrl(post.groupThumbnail)}
+          />
         )}
         {post?.groupName && (
           <Link
             href={`/post/${encodeURIComponent(post.groupUrl ?? post.groupName)}`}
-            className="text-neutral-400 hover:text-neutral-200"
+            className="font-medium text-neutral-200 hover:underline shrink-0"
           >
             {post.groupName}
           </Link>
         )}
-        {post?.no != null && <span>#{post.no}</span>}
+        {post?.name &&
+          (post?.authorUrl ? (
+            <Link
+              href={`/post/${encodeURIComponent(post.authorUrl)}`}
+              className="hover:underline truncate"
+            >
+              {post.name}
+            </Link>
+          ) : (
+            <span className="truncate">{post.name}</span>
+          ))}
+        {post?.no != null && <span className="shrink-0">#{post.no}</span>}
+        {post?.date && <Bullet />}
         {post?.date && (
-          <span title={new Date(post.date).toLocaleString()}>
+          <span
+            className="shrink-0"
+            title={new Date(post.date).toLocaleString()}
+          >
             {formatTimeAgo(new Date(post.date))}
           </span>
         )}
-        {(post?.score ?? 0) > 0 && (
-          <span className="flex items-center gap-x-1">
-            <ArrowUp size={12} />
-            {post!.score}
-          </span>
-        )}
-        {(post?.count ?? 0) > 0 && (
-          <span className="flex items-center gap-x-1">
-            <MessageSquare size={12} />
-            {post!.count}
-          </span>
-        )}
-        {post?.sourceUrl && (
-          <a
-            href={post.sourceUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 p-1 -m-1"
-          >
-            <ExternalLink size={12} />
-          </a>
-        )}
-        {post?.postUrl && (
-          <a
-            href={post.postUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-auto shrink-0 p-1 -m-1"
-          >
-            <ExternalLink size={12} />
-          </a>
-        )}
+        <div className="ml-auto flex items-center gap-x-1 shrink-0">
+          {post?.postUrl && (
+            <a
+              href={post.postUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="p-1 -m-1"
+            >
+              <ExternalLink size={12} />
+            </a>
+          )}
+          {post?.sourceUrl && (
+            <a
+              href={post.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="p-1 -m-1"
+            >
+              <ExternalLink size={12} />
+            </a>
+          )}
+        </div>
       </div>
+      {post?.title && (
+        <h1 className="font-semibold text-sm leading-snug">{post.title}</h1>
+      )}
       {post?.thumbnail &&
         (post?.url ? (
           <>
@@ -212,7 +216,7 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
               ) : (
                 <img
                   alt=""
-                  className="max-w-xs object-contain rounded-lg"
+                  className="w-full object-contain rounded-lg"
                   src={proxyUrl(post.url)}
                 />
               )
@@ -238,6 +242,23 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
           dangerouslySetInnerHTML={{ __html: post.com }}
         />
       )}
+      {hasStats && (
+        <div className="flex items-center gap-x-1.5 text-xs text-neutral-400">
+          {(post?.score ?? 0) > 0 && (
+            <span className="flex items-center gap-x-1">
+              <ArrowUp size={12} />
+              {post!.score}
+            </span>
+          )}
+          {(post?.score ?? 0) > 0 && (post?.count ?? 0) > 0 && <Bullet />}
+          {(post?.count ?? 0) > 0 && (
+            <span className="flex items-center gap-x-1">
+              <MessageSquare size={12} />
+              {post!.count}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -245,14 +266,39 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
 interface MediaBoardItemContainerProps {
   post?: BoardItem;
   extraClassName?: string;
+  separator?: boolean;
 }
 
 export const MediaBoardItemContainer = ({
   post,
   extraClassName,
+  separator,
 }: MediaBoardItemContainerProps) => {
   return (
-    <div className="flex flex-col gap-y-2 min-w-0 border-b xs:border-b-0 border-neutral-800 pb-2 xs:pb-0">
+    <div
+      className={`flex flex-col gap-y-2 min-w-0 border-neutral-800 pb-2 ${separator ? "border-b" : "border-b xs:border-b-0 xs:pb-0"}`}
+    >
+      {(post?.groupName || post?.date) && (
+        <div className="flex items-center gap-x-1.5 text-neutral-400 text-xs">
+          {post?.groupThumbnail && (
+            <img
+              alt=""
+              className="h-4 w-4 rounded-full object-cover"
+              src={`${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${encodeURIComponent(post.groupThumbnail)}`}
+            />
+          )}
+          {post?.groupName && (
+            <Link
+              href={`/post/${encodeURIComponent(post.groupUrl ?? post.groupName)}`}
+              className="font-medium text-neutral-200 hover:underline truncate"
+            >
+              {post.groupName}
+            </Link>
+          )}
+          {post?.groupName && post?.date && <Bullet />}
+          {post?.date && <span>{formatTimeAgo(new Date(post.date))}</span>}
+        </div>
+      )}
       <Link
         className="outline-none"
         href={`/post/${encodeURIComponent(String(post?.url))}`}
@@ -300,10 +346,6 @@ export const MediaBoardItemContainer = ({
             </span>
           </>
         )}
-        {((post?.count ?? 0) > 0 || (post?.score ?? 0) > 0) && post?.date && (
-          <Bullet />
-        )}
-        {post?.date && <span>{formatTimeAgo(new Date(post.date))}</span>}
       </div>
     </div>
   );

@@ -624,6 +624,7 @@ def normalize(category, subcategory, data, base_url, url=""):
             urls = data.get("urls", [])
             return {
                 "renderer": "media-board",
+                "columns": 1,
                 **({"searchable": False} if key == ("bd300ce5", "2c906dae") else {}),
                 "items": [
                     {
@@ -666,6 +667,14 @@ def normalize(category, subcategory, data, base_url, url=""):
                             if m.get("created_utc")
                             else None
                         ),
+                        "groupName": (
+                            f"r/{m['subreddit']}" if m.get("subreddit") else None
+                        ),
+                        "groupUrl": (
+                            f"{base_url}/r/{m['subreddit']}"
+                            if m.get("subreddit")
+                            else None
+                        ),
                     }
                     for i, m in enumerate(meta)
                 ],
@@ -679,9 +688,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                     selftext_html = re.sub(
                         r"<!--.*?-->", "", _html.unescape(m.get("selftext_html") or "")
                     ).strip()
-                    com = f"<p><strong>{_html.escape(title)}</strong></p>"
-                    if selftext_html:
-                        com += selftext_html
+                    com = selftext_html or None
                     thumbnail = next(
                         (
                             v
@@ -709,14 +716,20 @@ def normalize(category, subcategory, data, base_url, url=""):
                     sub_url = m.get("url", "")
                     if m.get("is_video"):
                         reddit_video = (m.get("media") or {}).get("reddit_video") or {}
-                        media_url = reddit_video.get("fallback_url") or reddit_video.get("hls_url") or None
+                        media_url = (
+                            reddit_video.get("fallback_url")
+                            or reddit_video.get("hls_url")
+                            or None
+                        )
                         media_type = "video"
                         source_url = None
                     elif sub_url.startswith("https://i.redd.it/"):
                         media_url = sub_url
                         media_type = "image"
                         source_url = None
-                    elif sub_url and not m.get("is_self") and "reddit.com" not in sub_url:
+                    elif (
+                        sub_url and not m.get("is_self") and "reddit.com" not in sub_url
+                    ):
                         media_url = None
                         media_type = None
                         source_url = sub_url
@@ -729,9 +742,12 @@ def normalize(category, subcategory, data, base_url, url=""):
                     subreddit = m.get("subreddit")
                     items.append(
                         {
+                            "title": title or None,
                             "com": com,
                             "name": author,
-                            "authorUrl": f"{base_url}/user/{author}" if author else None,
+                            "authorUrl": (
+                                f"{base_url}/user/{author}" if author else None
+                            ),
                             "date": (
                                 datetime.utcfromtimestamp(m["created_utc"]).isoformat()
                                 + "Z"
@@ -746,7 +762,9 @@ def normalize(category, subcategory, data, base_url, url=""):
                             "score": m.get("score"),
                             "count": m.get("num_comments"),
                             "groupName": f"r/{subreddit}" if subreddit else None,
-                            "groupUrl": f"{base_url}/r/{subreddit}" if subreddit else None,
+                            "groupUrl": (
+                                f"{base_url}/r/{subreddit}" if subreddit else None
+                            ),
                         }
                     )
                 else:
@@ -760,7 +778,9 @@ def normalize(category, subcategory, data, base_url, url=""):
                         {
                             "com": body_html,
                             "name": author,
-                            "authorUrl": f"{base_url}/user/{author}" if author else None,
+                            "authorUrl": (
+                                f"{base_url}/user/{author}" if author else None
+                            ),
                             "date": (
                                 datetime.utcfromtimestamp(m["created_utc"]).isoformat()
                                 + "Z"

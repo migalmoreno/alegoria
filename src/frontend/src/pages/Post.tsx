@@ -66,8 +66,24 @@ const MediaBoard = ({
   <ItemsContainer<MediaBoardResponse, BoardItem>
     url={url}
     initialData={initialData}
-    columns="xs:grid-cols-2 lg:grid-cols-3"
-    itemRenderer={(item, i) => <MediaBoardItemContainer key={i} post={item} />}
+    columns={
+      initialData?.columns != null
+        ? `grid-cols-${initialData.columns}`
+        : "xs:grid-cols-2 lg:grid-cols-3"
+    }
+    containerClass={
+      initialData?.columns === 1 ? "w-full max-w-2xl mx-auto" : undefined
+    }
+    itemRenderer={(item, i) => (
+      <MediaBoardItemContainer
+        key={i}
+        post={item}
+        separator={initialData?.columns === 1}
+        extraClassName={
+          initialData?.columns === 1 ? "!h-[500px] !min-h-[500px]" : ""
+        }
+      />
+    )}
   />
 );
 
