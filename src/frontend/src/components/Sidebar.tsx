@@ -1,7 +1,7 @@
 import { ReactElement, useEffect } from "react";
 import { toast } from "sonner";
 import type { Category } from "~/types";
-import { HomeIcon } from "lucide-react";
+import { BookmarkIcon, HomeIcon } from "lucide-react";
 import { Link } from "wouter";
 import { SharedNavbarSubMenu } from "./Navbar";
 import { AnimatePresence, motion } from "motion/react";
@@ -29,8 +29,9 @@ const MenuLink = ({ link, label, icon }: MenuLinkProps) => {
 const Menu = () => {
   return (
     <div className="flex flex-col gap-y-2 justify-between w-[250px] border-r border-neutral-800">
-      <div className="p-2">
+      <div className="py-4 px-2 flex flex-col gap-y-4">
         <MenuLink label="Home" link="/" icon={<HomeIcon />} />
+        <MenuLink label="Bookmarks" link="/bookmarks" icon={<BookmarkIcon />} />
       </div>
       <div className="border-t border-neutral-800 p-2">
         <span className="flex py-4 p-2 text-sm text-neutral-300">

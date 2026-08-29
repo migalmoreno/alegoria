@@ -4,7 +4,16 @@ import { GalleryItem, BoardItem, ThreadPost } from "~/types";
 import { formatTimeAgo } from "~/utils";
 import { Bullet } from "./Bullet";
 import { UserAvatar } from "./UserAvatar";
-import { MessageSquare, ArrowUp, ExternalLink } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  MessageSquare,
+  ArrowUp,
+  ExternalLink,
+} from "lucide-react";
+import { useBookmarkStore } from "~/bookmarkStore";
+import { Button } from "./Button";
+import { Stat } from "./Stat";
 
 interface ImagePostContainerProps {
   post?: GalleryItem;
@@ -134,12 +143,23 @@ const hostname = (url: string) => {
 
 export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
   const [mediaOpen, setMediaOpen] = useState(false);
+  const { add, remove, isBookmarked } = useBookmarkStore();
   const proxyUrl = (u: string) =>
     `${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${encodeURIComponent(u)}`;
   const isVideo =
     post?.mediaType === "video" ||
     /\.(mp4|webm|mov|m4v)(\?|$)/i.test(post?.url ?? "");
   const hasStats = (post?.score ?? 0) > 0 || (post?.count ?? 0) > 0;
+  const bookmarkUrl = post?.postUrl;
+  const bookmarked = bookmarkUrl ? isBookmarked(bookmarkUrl) : false;
+  const toggleBookmark = () => {
+    if (!bookmarkUrl) return;
+    if (bookmarked) {
+      remove(bookmarkUrl);
+    } else {
+      add({ url: bookmarkUrl, title: post?.title, thumbnail: post?.thumbnail });
+    }
+  };
 
   return (
     <div
@@ -258,20 +278,25 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
           dangerouslySetInnerHTML={{ __html: post.com }}
         />
       )}
-      {hasStats && (
-        <div className="flex items-center gap-x-1.5 text-xs text-neutral-400">
+      {(hasStats || bookmarkUrl) && (
+        <div className="flex items-center gap-x-3">
           {(post?.score ?? 0) > 0 && (
-            <span className="flex items-center gap-x-1">
-              <ArrowUp size={12} />
-              {post!.score}
-            </span>
+            <Stat icon={<ArrowUp />} value={post!.score!} />
           )}
-          {(post?.score ?? 0) > 0 && (post?.count ?? 0) > 0 && <Bullet />}
           {(post?.count ?? 0) > 0 && (
-            <span className="flex items-center gap-x-1">
-              <MessageSquare size={12} />
-              {post!.count}
-            </span>
+            <Stat icon={<MessageSquare />} value={post!.count!} />
+          )}
+          {bookmarkUrl && (
+            <Button
+              size="sm"
+              icon={bookmarked ? <BookmarkCheck /> : <Bookmark />}
+              onClick={toggleBookmark}
+              extraClassName={
+                bookmarked ? "" : "text-neutral-400 hover:text-white"
+              }
+            >
+              {bookmarked ? "Saved" : "Save"}
+            </Button>
           )}
         </div>
       )}

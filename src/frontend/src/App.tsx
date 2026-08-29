@@ -1,6 +1,6 @@
 import { Route, Router, Switch } from "wouter";
 import { Layout } from "./components";
-import { HomePage, PostPage } from "./pages";
+import { BookmarksPage, HomePage, PostPage } from "./pages";
 import {
   QueryClient,
   QueryClientProvider,
@@ -39,6 +39,7 @@ function App() {
           <div className="min-h-[calc(100dvh-60px)] bg-black w-full text-white flex-auto flex">
             <Switch>
               <Route path="/" component={HomePage} />
+              <Route path="/bookmarks" component={BookmarksPage} />
               <Route path="/post/:url" component={PostPage} />
               <Route>
                 <div className="flex-auto flex flex-col items-center justify-center min-h-full min-w-full gap-y-4">
