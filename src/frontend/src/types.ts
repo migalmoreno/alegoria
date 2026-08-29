@@ -66,6 +66,8 @@ export interface ImageResponse {
   groupThumbnail?: string;
   groupUrl?: string;
   stats?: ImageStats;
+  width?: number;
+  height?: number;
 }
 
 export interface UserInfoData {

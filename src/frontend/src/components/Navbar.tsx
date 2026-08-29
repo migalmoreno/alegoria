@@ -268,7 +268,7 @@ const SearchForm = () => {
           </div>
         )}
         <input
-          className="outline-none flex-1 min-w-0"
+          className="outline-none flex-1 min-w-0 disabled:cursor-not-allowed disabled:opacity-40"
           placeholder="Search"
           disabled={isFilterOnly || !isSearchable}
           onFocus={() => setCategorySelected(true)}

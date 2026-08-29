@@ -1,3 +1,4 @@
+export { BottomSheet } from "./BottomSheet";
 export { Button } from "./Button";
 export { Stat } from "./Stat";
 export { Select } from "./Select";

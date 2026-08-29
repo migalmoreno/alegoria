@@ -372,6 +372,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "authorName": post["creator"]["vanity"],
                 "authorUrl": post["creator"]["url"],
                 "authorThumbnail": post["campaign"]["avatar_photo_url"],
+                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
             }
         case ("5c6e7131", "9d8e01de"):
             if not any(post.get("id") for post in meta):
@@ -401,6 +402,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "date": post.get("date"),
                 "authorName": post.get("username"),
                 "authorUrl": f"{base_url}/{post['user_id']}",
+                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
             }
         case ("e88db17b", "a3848f58"):
             urls = data.get("urls", [])
@@ -483,6 +485,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "date": m.get("date"),
                 "description": m.get("description"),
                 "authorUrl": f"{base_url}/{p.get('user')}",
+                **({"width": m.get("width"), "height": m.get("height")} if m.get("width") and m.get("height") else {}),
             }
         case ("c0d3c7b1", "1776446d"):
             return {
@@ -548,6 +551,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "groupName": post["board"]["name"],
                 "groupThumbnail": post["board"]["image_cover_url"],
                 "groupUrl": f"{base_url}{post['board']['url']}",
+                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
             }
         case (
             ("ce200ea0", "404ea5a3")
@@ -587,6 +591,7 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "description": m.get("description"),
                 "authorName": p.get("creator"),
                 "authorUrl": f"{base_url}/{p.get('creator')}",
+                **({"width": m.get("width"), "height": m.get("height")} if m.get("width") and m.get("height") else {}),
             }
         case ("b8d92073", "f374b090"):
             urls = data.get("urls", [])
@@ -877,6 +882,8 @@ def normalize(category, subcategory, data, base_url, url=""):
             )
             video = p.get("video") or {}
             raw_stats = p.get("stats") or {}
+            width = video.get("width")
+            height = video.get("height")
             stats = {
                 k: v for k, v in {
                     "likes": raw_stats.get("diggCount"),
