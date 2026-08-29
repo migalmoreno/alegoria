@@ -124,6 +124,14 @@ interface ThreadPostContainerProps {
   post?: ThreadPost;
 }
 
+const hostname = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+};
+
 export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
   const [mediaOpen, setMediaOpen] = useState(false);
   const proxyUrl = (u: string) =>
@@ -176,34 +184,41 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
             {formatTimeAgo(new Date(post.date))}
           </span>
         )}
-        <div className="ml-auto flex items-center gap-x-1 shrink-0">
-          {post?.postUrl && (
-            <a
-              href={post.postUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="p-1 -m-1"
-            >
-              <ExternalLink size={12} />
-            </a>
-          )}
-          {post?.sourceUrl && (
-            <a
-              href={post.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="p-1 -m-1"
-            >
-              <ExternalLink size={12} />
-            </a>
-          )}
-        </div>
+        {post?.postUrl && (
+          <a
+            href={post.postUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto p-1 -m-1 shrink-0"
+          >
+            <ExternalLink size={12} />
+          </a>
+        )}
       </div>
       {post?.title && (
         <h1 className="font-semibold text-sm leading-snug">{post.title}</h1>
       )}
       {post?.thumbnail &&
-        (post?.url ? (
+        (post?.sourceUrl ? (
+          <a
+            href={post.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="block border border-neutral-700 rounded-lg overflow-hidden max-w-xs"
+          >
+            <img
+              alt=""
+              className="max-h-64 w-full object-cover"
+              src={proxyUrl(post.thumbnail)}
+            />
+            <div className="flex items-center justify-between px-3 py-2 text-xs text-neutral-400">
+              <span className="truncate">{hostname(post.sourceUrl)}</span>
+              <span className="text-neutral-200 font-medium ml-2 shrink-0">
+                Open
+              </span>
+            </div>
+          </a>
+        ) : post?.url ? (
           <>
             {mediaOpen ? (
               isVideo ? (
