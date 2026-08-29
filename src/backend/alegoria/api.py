@@ -798,7 +798,6 @@ def normalize(category, subcategory, data, base_url, url=""):
                         media_url = None
                         media_type = None
                         source_url = sub_url
-                        thumbnail = m.get("thumbnail") or thumbnail
                     else:
                         media_url = None
                         media_type = None
