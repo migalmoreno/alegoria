@@ -1,4 +1,5 @@
 export { Button } from "./Button";
+export { Stat } from "./Stat";
 export { Select } from "./Select";
 export { Bullet } from "./Bullet";
 export { ErrorContainer } from "./ErrorContainer";

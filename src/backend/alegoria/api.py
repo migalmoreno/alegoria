@@ -876,6 +876,15 @@ def normalize(category, subcategory, data, base_url, url=""):
                 else None
             )
             video = p.get("video") or {}
+            raw_stats = p.get("stats") or {}
+            stats = {
+                k: v for k, v in {
+                    "likes": raw_stats.get("diggCount"),
+                    "plays": raw_stats.get("playCount"),
+                    "comments": raw_stats.get("commentCount"),
+                    "shares": raw_stats.get("shareCount"),
+                }.items() if v is not None
+            }
             return {
                 "renderer": "image",
                 "url": video.get("cover"),
@@ -888,6 +897,8 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "authorName": p.get("user"),
                 "authorUrl": f"{base_url}/@{p.get('user')}",
                 "authorThumbnail": (p.get("author") or {}).get("avatarThumb"),
+                **({"stats": stats} if stats else {}),
+                **({"width": width, "height": height} if width and height else {}),
             }
     return None
 

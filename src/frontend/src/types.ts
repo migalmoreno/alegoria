@@ -41,6 +41,15 @@ export interface GalleryResponse {
   items: GalleryItem[];
 }
 
+export interface ImageStats {
+  likes?: number;
+  plays?: number;
+  comments?: number;
+  shares?: number;
+  score?: number;
+  saves?: number;
+}
+
 export interface ImageResponse {
   renderer: "image";
   url: string;
@@ -56,6 +65,7 @@ export interface ImageResponse {
   groupName?: string;
   groupThumbnail?: string;
   groupUrl?: string;
+  stats?: ImageStats;
 }
 
 export interface UserInfoData {
