@@ -280,7 +280,11 @@ def get_extractors():
                     "url": sub_info["example"],
                     "groups": sub_info["groups"],
                     "configPath": ext_inst._cfgpath if ext_inst else [category],
-                    **({"filters": sub_info["filters"]} if "filters" in sub_info else {}),
+                    **(
+                        {"filters": sub_info["filters"]}
+                        if "filters" in sub_info
+                        else {}
+                    ),
                 }
             )
 
@@ -372,7 +376,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "authorName": post["creator"]["vanity"],
                 "authorUrl": post["creator"]["url"],
                 "authorThumbnail": post["campaign"]["avatar_photo_url"],
-                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
+                **(
+                    {"width": post.get("width"), "height": post.get("height")}
+                    if post.get("width") and post.get("height")
+                    else {}
+                ),
             }
         case ("5c6e7131", "9d8e01de"):
             if not any(post.get("id") for post in meta):
@@ -402,7 +410,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "date": post.get("date"),
                 "authorName": post.get("username"),
                 "authorUrl": f"{base_url}/{post['user_id']}",
-                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
+                **(
+                    {"width": post.get("width"), "height": post.get("height")}
+                    if post.get("width") and post.get("height")
+                    else {}
+                ),
             }
         case ("e88db17b", "a3848f58"):
             urls = data.get("urls", [])
@@ -485,7 +497,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "date": m.get("date"),
                 "description": m.get("description"),
                 "authorUrl": f"{base_url}/{p.get('user')}",
-                **({"width": m.get("width"), "height": m.get("height")} if m.get("width") and m.get("height") else {}),
+                **(
+                    {"width": m.get("width"), "height": m.get("height")}
+                    if m.get("width") and m.get("height")
+                    else {}
+                ),
             }
         case ("c0d3c7b1", "1776446d"):
             return {
@@ -551,7 +567,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "groupName": post["board"]["name"],
                 "groupThumbnail": post["board"]["image_cover_url"],
                 "groupUrl": f"{base_url}{post['board']['url']}",
-                **({"width": post.get("width"), "height": post.get("height")} if post.get("width") and post.get("height") else {}),
+                **(
+                    {"width": post.get("width"), "height": post.get("height")}
+                    if post.get("width") and post.get("height")
+                    else {}
+                ),
             }
         case (
             ("ce200ea0", "404ea5a3")
@@ -591,7 +611,11 @@ def normalize(category, subcategory, data, base_url, url=""):
                 "description": m.get("description"),
                 "authorName": p.get("creator"),
                 "authorUrl": f"{base_url}/{p.get('creator')}",
-                **({"width": m.get("width"), "height": m.get("height")} if m.get("width") and m.get("height") else {}),
+                **(
+                    {"width": m.get("width"), "height": m.get("height")}
+                    if m.get("width") and m.get("height")
+                    else {}
+                ),
             }
         case ("b8d92073", "f374b090"):
             urls = data.get("urls", [])
@@ -751,9 +775,26 @@ def normalize(category, subcategory, data, base_url, url=""):
             }
         case ("bd300ce5", "578a8689"):
             urls = [u for u in data.get("urls", []) if not u.startswith("ytdl:")]
+            is_comment_url = bool(re.search(r"/comments/[^/?#]+/[^/?#]+/[^/?#]+", url))
+            sub_id_match = re.search(r"/comments/([a-z0-9]+)", url)
+            sub_id = sub_id_match.group(1) if sub_id_match else ""
+            fc_match = (
+                re.search(r"/comments/[^/?#]+/[^/?#]+/([a-z0-9]+)", url)
+                if is_comment_url
+                else None
+            )
+            focused_comment_id = fc_match.group(1) if fc_match else ""
             items = []
+            listing_cursor = None
+            listing_cursor_type = None
             for i, m in enumerate(meta):
+                if m.get("gdl_cursor"):
+                    listing_cursor = m.get("gdl_cursor_val")
+                    listing_cursor_type = m["gdl_cursor"]
+                    continue
                 if m.get("_reddit_type") == "submission" or m.get("title"):
+                    if is_comment_url:
+                        continue
                     title = m.get("title", "")
                     selftext_html = re.sub(
                         r"<!--.*?-->", "", _html.unescape(m.get("selftext_html") or "")
@@ -837,12 +878,29 @@ def normalize(category, subcategory, data, base_url, url=""):
                         }
                     )
                 else:
+                    parent_id = m.get("parent_id", "")
+                    if is_comment_url:
+                        if m.get("id") == focused_comment_id:
+                            continue
+                        if parent_id != "t1_" + focused_comment_id:
+                            continue
+                    else:
+                        if not parent_id.startswith("t3_"):
+                            continue
                     body_html = re.sub(
                         r"<!--.*?-->", "", _html.unescape(m.get("body_html") or "")
                     ).strip()
                     if not body_html:
                         continue
                     author = m.get("author")
+                    subreddit = m.get("subreddit", "")
+                    comment_id = m.get("id", "")
+                    permalink = m.get("permalink") or (
+                        f"/r/{subreddit}/comments/{sub_id}/_/{comment_id}/"
+                        if subreddit and sub_id and comment_id
+                        else None
+                    )
+                    has_replies = bool(m.get("replies"))
                     items.append(
                         {
                             "com": body_html,
@@ -857,11 +915,24 @@ def normalize(category, subcategory, data, base_url, url=""):
                                 else None
                             ),
                             "score": m.get("score"),
+                            "repliesUrl": (
+                                f"{base_url}{permalink}"
+                                if permalink and has_replies
+                                else None
+                            ),
                         }
                     )
+            next_url = None
+            if is_comment_url and listing_cursor:
+                base_comment_url = url.split("?")[0]
+                if listing_cursor_type == "after":
+                    next_url = f"{base_comment_url}?after={listing_cursor}"
+                else:
+                    next_url = f"{base_comment_url}?children={listing_cursor}"
             return {
                 "renderer": "thread",
                 "items": items,
+                **({"nextUrl": next_url} if next_url else {}),
             }
         case ("b8d92073", "33295e95"):
             posts = data.get("post", [])
@@ -885,12 +956,14 @@ def normalize(category, subcategory, data, base_url, url=""):
             width = video.get("width")
             height = video.get("height")
             stats = {
-                k: v for k, v in {
+                k: v
+                for k, v in {
                     "likes": raw_stats.get("diggCount"),
                     "plays": raw_stats.get("playCount"),
                     "comments": raw_stats.get("commentCount"),
                     "shares": raw_stats.get("shareCount"),
-                }.items() if v is not None
+                }.items()
+                if v is not None
             }
             return {
                 "renderer": "image",

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { GalleryItem, BoardItem, ThreadPost } from "~/types";
+import { GalleryItem, BoardItem, ThreadPost, ThreadResponse } from "~/types";
 import { formatTimeAgo } from "~/utils";
 import { Bullet } from "./Bullet";
 import { UserAvatar } from "./UserAvatar";
@@ -143,7 +144,30 @@ const hostname = (url: string) => {
 
 export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [currentReplyUrl, setCurrentReplyUrl] = useState<string | null>(null);
+  const [allReplies, setAllReplies] = useState<ThreadPost[]>([]);
+  const [replyNextUrl, setReplyNextUrl] = useState<string | null>(null);
   const { add, remove, isBookmarked } = useBookmarkStore();
+
+  useEffect(() => {
+    if (showReplies && !currentReplyUrl && post?.repliesUrl) {
+      setCurrentReplyUrl(post.repliesUrl);
+    }
+  }, [showReplies]);
+
+  const { data: repliesData, isFetching: repliesFetching } = useQuery<ThreadResponse>({
+    enabled: !!currentReplyUrl,
+    queryKey: [`/posts/${encodeURIComponent(currentReplyUrl ?? "")}`],
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
+  useEffect(() => {
+    if (!repliesData) return;
+    setAllReplies((prev) => [...prev, ...(repliesData.items ?? [])]);
+    setReplyNextUrl(repliesData.nextUrl ?? null);
+  }, [repliesData]);
   const proxyUrl = (u: string) =>
     `${import.meta.env.VITE_API_URL}/api/v1/proxy?url=${encodeURIComponent(u)}`;
   const isVideo =
@@ -297,6 +321,32 @@ export const ThreadPostContainer = ({ post }: ThreadPostContainerProps) => {
             >
               {bookmarked ? "Saved" : "Save"}
             </Button>
+          )}
+        </div>
+      )}
+      {post?.repliesUrl && (
+        <button
+          className="text-xs text-indigo-400 hover:text-indigo-300 self-start"
+          onClick={() => setShowReplies((v) => !v)}
+        >
+          {showReplies ? "Hide replies" : "View replies"}
+        </button>
+      )}
+      {showReplies && (
+        <div className="flex flex-col gap-y-2 border-l border-neutral-700 pl-3 ml-1">
+          {allReplies.map((reply, i) => (
+            <ThreadPostContainer key={i} post={reply} />
+          ))}
+          {repliesFetching && (
+            <span className="text-xs text-neutral-500">Loading...</span>
+          )}
+          {!repliesFetching && replyNextUrl && (
+            <button
+              className="text-xs text-indigo-400 hover:text-indigo-300 self-start"
+              onClick={() => setCurrentReplyUrl(replyNextUrl)}
+            >
+              Load more replies
+            </button>
           )}
         </div>
       )}

@@ -132,6 +132,7 @@ export interface ThreadPost {
   mediaType?: string;
   sourceUrl?: string;
   postUrl?: string;
+  repliesUrl?: string;
   score?: number;
   count?: number;
   groupName?: string;
@@ -144,6 +145,7 @@ export interface ThreadPost {
 export interface ThreadResponse {
   renderer: "thread";
   items: ThreadPost[];
+  nextUrl?: string;
 }
 
 export type PageResponse =
