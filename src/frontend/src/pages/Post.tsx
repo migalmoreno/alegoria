@@ -15,7 +15,17 @@ import {
 } from "~/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLoadingBar } from "react-top-loading-bar";
-import { Bookmark, BookmarkCheck, CheckCircle, Heart, Play, MessageCircle, Share2, ArrowUp, Star } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  CheckCircle,
+  Heart,
+  Play,
+  MessageCircle,
+  Share2,
+  ArrowUp,
+  Star,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useBookmarkStore } from "~/bookmarkStore";
 import ShakaVideo from "shaka-video-element/react";
@@ -30,7 +40,7 @@ import {
   ItemsContainer,
 } from "~/components";
 import { ErrorContainer, UserAvatar } from "~/components";
-import { formatTimeAgo, formatNumber } from "~/utils";
+import { formatTimeAgo } from "~/utils";
 
 const Gallery = ({
   url,
@@ -214,11 +224,23 @@ const ImageView = ({
   const hasAspect = !!(data.width && data.height);
   return (
     <div className="flex flex-col items-center justify-center flex-auto bg-black text-white box-border lg:p-8">
-      <div className={`w-full lg:border lg:overflow-hidden border-neutral-800 ${hasAspect ? "lg:w-fit lg:max-w-[80%]" : "flex-auto lg:h-[550px] lg:w-4/5"}`}>
-        <div className={`h-[calc(100dvh-60px)] flex flex-col md:flex-row ${hasAspect ? "lg:h-auto" : "lg:h-full flex-auto"}`}>
+      <div
+        className={`w-full lg:border lg:overflow-hidden border-neutral-800 ${hasAspect ? "lg:w-fit lg:max-w-[80%]" : "flex-auto lg:h-[550px] lg:w-4/5"}`}
+      >
+        <div
+          className={`h-[calc(100dvh-60px)] flex flex-col md:flex-row ${hasAspect ? "lg:h-auto" : "lg:h-full flex-auto"}`}
+        >
           <div
-            className={hasAspect ? "flex-1 md:flex-none overflow-hidden md:max-h-[calc(100dvh-60px)] lg:max-h-[calc(100dvh-60px-4rem-2px)]" : "h-0 md:h-full w-full flex-auto"}
-            style={hasAspect ? { aspectRatio: `${data.width}/${data.height}` } : undefined}
+            className={
+              hasAspect
+                ? "flex-1 md:flex-none overflow-hidden md:max-h-[calc(100dvh-60px)] lg:max-h-[calc(100dvh-60px-4rem-2px)]"
+                : "h-0 md:h-full w-full flex-auto"
+            }
+            style={
+              hasAspect
+                ? { aspectRatio: `${data.width}/${data.height}` }
+                : undefined
+            }
           >
             {data.type === "video" ? (
               <ShakaVideo
@@ -236,7 +258,9 @@ const ImageView = ({
               />
             ) : null}
           </div>
-          <div className={`md:border-l border-neutral-800 md:p-0 flex flex-col gap-y-2 py-4 p-2 ${hasAspect ? "md:flex-1 lg:flex-initial lg:w-[400px] lg:max-h-[calc(100dvh-60px-4rem-2px)]" : "md:w-[380px] md:shrink-0"}`}>
+          <div
+            className={`md:border-l border-neutral-800 md:p-0 flex flex-col gap-y-2 py-4 p-2 ${hasAspect ? "md:flex-1 lg:flex-initial lg:w-[400px] lg:max-h-[calc(100dvh-60px-4rem-2px)]" : "md:w-[380px] md:shrink-0"}`}
+          >
             <div className="md:border-b border-neutral-800 md:p-4 flex gap-x-2 gap-y-4 items-center px-2 justify-between md:justify-normal md:flex-wrap text-sm">
               <div className="flex items-center gap-x-2">
                 {data.authorThumbnail && (
@@ -298,7 +322,10 @@ const ImageView = ({
                       </span>
                     )}
                   </div>
-                  <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
+                  <BottomSheet
+                    open={sheetOpen}
+                    onClose={() => setSheetOpen(false)}
+                  >
                     <span
                       className="text-sm/6 text-neutral-200 [overflow-wrap:anywhere]"
                       dangerouslySetInnerHTML={{ __html: data.description }}
@@ -309,12 +336,24 @@ const ImageView = ({
             </div>
             <div className="shrink-0 md:border-t border-neutral-800 md:p-4 px-2 py-3 flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3 flex-wrap w-full">
-                {data.stats?.likes != null && <Stat icon={<Heart />} value={data.stats.likes} />}
-                {data.stats?.plays != null && <Stat icon={<Play />} value={data.stats.plays} />}
-                {data.stats?.comments != null && <Stat icon={<MessageCircle />} value={data.stats.comments} />}
-                {data.stats?.shares != null && <Stat icon={<Share2 />} value={data.stats.shares} />}
-                {data.stats?.score != null && <Stat icon={<ArrowUp />} value={data.stats.score} />}
-                {data.stats?.saves != null && <Stat icon={<Star />} value={data.stats.saves} />}
+                {data.stats?.likes != null && (
+                  <Stat icon={<Heart />} value={data.stats.likes} />
+                )}
+                {data.stats?.plays != null && (
+                  <Stat icon={<Play />} value={data.stats.plays} />
+                )}
+                {data.stats?.comments != null && (
+                  <Stat icon={<MessageCircle />} value={data.stats.comments} />
+                )}
+                {data.stats?.shares != null && (
+                  <Stat icon={<Share2 />} value={data.stats.shares} />
+                )}
+                {data.stats?.score != null && (
+                  <Stat icon={<ArrowUp />} value={data.stats.score} />
+                )}
+                {data.stats?.saves != null && (
+                  <Stat icon={<Star />} value={data.stats.saves} />
+                )}
                 <Button
                   size="sm"
                   icon={bookmarked ? <BookmarkCheck /> : <Bookmark />}
