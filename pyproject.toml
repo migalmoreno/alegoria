@@ -5,7 +5,7 @@ description = "Web aggregator for image galleries and collections from several h
 requires-python = ">=3.13"
 dependencies = [
     "flask>=3.1.2",
-    "gallery-dl==1.32.9",
+    "gallery-dl==1.32.10",
     "gunicorn>=23.0.0",
     "python-dotenv>=1.2.1",
 ]
